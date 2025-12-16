@@ -1,102 +1,313 @@
-import Image, { type ImageProps } from "next/image";
-import { Button } from "@repo/ui/button";
-import styles from "./page.module.css";
+"use client";
 
-type Props = Omit<ImageProps, "src"> & {
-  srcLight: string;
-  srcDark: string;
-};
+import Link from "next/link";
+import { motion } from "framer-motion";
 
-const ThemeImage = (props: Props) => {
-  const { srcLight, srcDark, ...rest } = props;
+/* =====================================================
+   DESIGN SYSTEM PRIMITIVES 
+===================================================== */
 
+function Container({ children }: { children: React.ReactNode }) {
   return (
-    <>
-      <Image {...rest} src={srcLight} className="imgLight" />
-      <Image {...rest} src={srcDark} className="imgDark" />
-    </>
-  );
-};
-
-export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <ThemeImage
-          className={styles.logo}
-          srcLight="turborepo-dark.svg"
-          srcDark="turborepo-light.svg"
-          alt="Turborepo logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>apps/web/app/page.tsx</code>
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new/clone?demo-description=Learn+to+implement+a+monorepo+with+a+two+Next.js+sites+that+has+installed+three+local+packages.&demo-image=%2F%2Fimages.ctfassets.net%2Fe5382hct74si%2F4K8ZISWAzJ8X1504ca0zmC%2F0b21a1c6246add355e55816278ef54bc%2FBasic.png&demo-title=Monorepo+with+Turborepo&demo-url=https%3A%2F%2Fexamples-basic-web.vercel.sh%2F&from=templates&project-name=Monorepo+with+Turborepo&repository-name=monorepo-turborepo&repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fturborepo%2Ftree%2Fmain%2Fexamples%2Fbasic&root-directory=apps%2Fdocs&skippable-integrations=1&teamSlug=vercel&utm_source=create-turbo"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://turborepo.com/docs?utm_source"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-        <Button appName="web" className={styles.secondary}>
-          Open alert
-        </Button>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com/templates?search=turborepo&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://turborepo.com?utm_source=create-turbo"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to turborepo.com →
-        </a>
-      </footer>
+    <div className="mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-12">
+      {children}
     </div>
+  );
+}
+
+function Section({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return <section className={`py-24 ${className}`}>{children}</section>;
+}
+
+
+
+function Hero() {
+  return (
+    <Section className="bg-linear-to-b from-white via-slate-50 to-white">
+      <Container>
+        <div className="grid items-center gap-16 lg:grid-cols-2">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <h1 className="text-4xl font-semibold leading-tight tracking-tight text-slate-900 lg:text-5xl">
+              A reliable technology partner for serious businesses
+            </h1>
+
+            <p className="mt-6 max-w-xl text-lg leading-relaxed text-slate-600">
+              Alivio Technology enables partners to build, operate, and scale with
+              stable systems, structured onboarding, and long-term support.
+            </p>
+
+            <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+              <Link
+                href="/partner/apply"
+                className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-7 py-3 text-sm font-medium text-white transition hover:bg-indigo-700"
+              >
+                Apply as a Partner
+              </Link>
+              <Link
+                href="#process"
+                className="inline-flex items-center justify-center rounded-xl border border-slate-300 px-7 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-400"
+              >
+                View Partnership Process
+              </Link>
+            </div>
+
+            <p className="mt-6 text-sm text-slate-500">
+              Clear terms • Secure onboarding • Dedicated support
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6 }}
+            className="relative"
+          >
+            <div className="rounded-3xl border border-slate-200 bg-white p-10 shadow-sm">
+              <div className="space-y-4">
+                <div className="h-3 w-32 rounded bg-slate-200" />
+                <div className="h-3 w-full rounded bg-slate-100" />
+                <div className="h-3 w-5/6 rounded bg-slate-100" />
+                <div className="h-3 w-2/3 rounded bg-slate-100" />
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </Container>
+    </Section>
+  );
+}
+
+/* =====================================================
+   WHO THIS IS FOR (SELF-QUALIFICATION)
+===================================================== */
+
+const segments = [
+  {
+    title: "Early-Stage Startups",
+    desc: "Founders building their first production-ready systems.",
+  },
+  {
+    title: "Local & Regional Businesses",
+    desc: "Businesses transitioning into structured digital operations.",
+  },
+  {
+    title: "Service & Operations Partners",
+    desc: "Teams delivering services within a trusted ecosystem.",
+  },
+  {
+    title: "Growth-Focused Enterprises",
+    desc: "Organizations scaling with reliability and governance.",
+  },
+];
+
+function Audience() {
+  return (
+    <Section>
+      <Container>
+        <div className="mx-auto max-w-3xl text-center">
+          <h2 className="text-3xl font-semibold text-slate-900">
+            Designed for partners who value stability
+          </h2>
+          <p className="mt-4 text-slate-600">
+            Alivio works best with teams looking for long-term collaboration,
+            not quick experiments.
+          </p>
+        </div>
+
+        <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          {segments.map((s) => (
+            <div
+              key={s.title}
+              className="rounded-2xl border border-slate-200 bg-white p-6"
+            >
+              <h3 className="text-sm font-semibold text-slate-900">
+                {s.title}
+              </h3>
+              <p className="mt-3 text-sm leading-relaxed text-slate-600">
+                {s.desc}
+              </p>
+            </div>
+          ))}
+        </div>
+      </Container>
+    </Section>
+  );
+}
+
+/* =====================================================
+   VALUE PROPOSITION (OUTCOME-FOCUSED)
+===================================================== */
+
+const benefits = [
+  {
+    title: "Production-Ready Technology",
+    desc: "Systems built for performance, security, and scale.",
+  },
+  {
+    title: "Structured Enablement",
+    desc: "Clear workflows, documentation, and onboarding.",
+  },
+  {
+    title: "Brand & Platform Association",
+    desc: "Operate under a growing and credible technology brand.",
+  },
+  {
+    title: "Ongoing Partner Support",
+    desc: "Real communication channels and technical assistance.",
+  },
+];
+
+function Value() {
+  return (
+    <Section className="bg-slate-50">
+      <Container>
+        <div className="grid gap-12 lg:grid-cols-2">
+          <div>
+            <h2 className="text-3xl font-semibold text-slate-900">
+              What partners receive
+            </h2>
+            <p className="mt-4 max-w-lg text-slate-600">
+              Beyond software, Alivio provides the structure required to operate
+              confidently at scale.
+            </p>
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-2">
+            {benefits.map((b) => (
+              <div
+                key={b.title}
+                className="rounded-2xl border border-slate-200 bg-white p-6"
+              >
+                <h3 className="text-sm font-semibold text-slate-900">
+                  {b.title}
+                </h3>
+                <p className="mt-3 text-sm text-slate-600">{b.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Container>
+    </Section>
+  );
+}
+
+/* =====================================================
+   PROCESS (REDUCES ANXIETY)
+===================================================== */
+
+const process = [
+  "Submit partner application",
+  "Internal verification & review",
+  "One-time onboarding fee",
+  "Activation & access enablement",
+];
+
+function Process() {
+  return (
+    <Section id="process">
+      <Container>
+        <div className="mx-auto max-w-3xl text-center">
+          <h2 className="text-3xl font-semibold text-slate-900">
+            Partnership process
+          </h2>
+          <p className="mt-4 text-slate-600">
+            A clear, transparent onboarding flow with no hidden steps.
+          </p>
+        </div>
+
+        <div className="mt-16 grid gap-8 md:grid-cols-4">
+          {process.map((step, i) => (
+            <div key={step} className="text-center">
+              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-sm font-semibold text-white">
+                {i + 1}
+              </div>
+              <p className="mt-4 text-sm text-slate-700">{step}</p>
+            </div>
+          ))}
+        </div>
+      </Container>
+    </Section>
+  );
+}
+
+/* =====================================================
+   PRICING (TRANSPARENCY)
+===================================================== */
+
+function Pricing() {
+  return (
+    <Section className="bg-slate-50">
+      <Container>
+        <div className="mx-auto max-w-xl rounded-3xl border border-slate-200 bg-white p-12 text-center">
+          <h2 className="text-2xl font-semibold text-slate-900">
+            Partner onboarding fee
+          </h2>
+          <div className="mt-6 text-5xl font-semibold text-indigo-600">₹200</div>
+          <p className="mt-3 text-sm text-slate-600">
+            One-time, non-refundable
+          </p>
+
+          <ul className="mt-8 space-y-2 text-sm text-slate-600">
+            <li>• Partner verification</li>
+            <li>• Platform access configuration</li>
+            <li>• Support channel activation</li>
+          </ul>
+        </div>
+      </Container>
+    </Section>
+  );
+}
+
+/* =====================================================
+   FINAL CTA
+===================================================== */
+
+function FinalCTA() {
+  return (
+    <Section>
+      <Container>
+        <div className="rounded-3xl bg-indigo-600 px-10 py-16 text-center text-white">
+          <h2 className="text-3xl font-semibold">
+            Begin your partnership with Alivio
+          </h2>
+          <p className="mt-4 text-indigo-100">
+            Apply once. Get verified. Build with confidence.
+          </p>
+          <Link
+            href="/partner/apply"
+            className="mt-8 inline-flex rounded-xl bg-white px-8 py-3 text-sm font-medium text-indigo-600 transition hover:bg-indigo-50"
+          >
+            Apply as a Partner
+          </Link>
+        </div>
+      </Container>
+    </Section>
+  );
+}
+
+/* =====================================================
+   PAGE
+===================================================== */
+
+export default function PartnerHomePage() {
+  return (
+    <main className="text-slate-900">
+      <Hero />
+      <Audience />
+      <Value />
+      <Process />
+      <Pricing />
+      <FinalCTA />
+    </main>
   );
 }
