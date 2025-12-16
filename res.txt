@@ -18,4 +18,4 @@
       5. pro-id - Here a pro-id will be generated associated with the vendor.
       6. dashboard - (dashboard is out of the partners folder so we will be using */dashboard*)
 
-      
+      This is the step by step procedure.
