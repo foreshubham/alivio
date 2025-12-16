@@ -1,1 +1,22 @@
 Alivio-Technology
+- components
+  --> Forms
+      1. StepBasicInfo - For basic details
+      2. SendOTP - OTP verfification by mobile
+      3. StepRoleIfo - Qualification, Vendor Type, Experience 
+      4. StepBankDetails- For bank details
+      5. StepTerms - Terms and Digital Signature
+      6. StepPayment - For payment
+      7. SuccessScreen - Application sent to Alivio Technology 
+
+      2nd Form After Approval
+
+ --> web/app/partners/onboarding
+      1. application-status - User can check their status here (This will be the first page after approval by admin),
+      2. buy-toolkit - where vendor has to purchase the toolkit and a confirmation of order will be sent to him/her.
+      3. zone - where the assigned (by admin) zone and code will be check.
+      4. tranning - where vendor will be assigned for the tranning.
+      5. pro-id - Here a pro-id will be generated associated with the vendor.
+      6. dashboard - (dashboard is out of the partners folder so we will be using */dashboard*)
+
+      This is the step by step procedure.
