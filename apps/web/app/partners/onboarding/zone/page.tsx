@@ -1,63 +1,86 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { useOnboarding } from "@/contexts/onboardingContext";
 
 export default function ZoneAssign() {
-  const { approved, setZone, setZoneCode, setBatch } = useOnboarding();
-
-  const [selectedZone, setSelectedZoneLocal] = useState("");
-  const [code, setCodeLocal] = useState("");
-  const [batch, setBatchLocal] = useState("");
+  const { approved, zone, zoneCode, batch } = useOnboarding();
 
   if (!approved) {
-    return <p className="text-center py-10">You are not approved yet.</p>;
+    return (
+      <div className="h-[60vh] flex items-center justify-center">
+        <p className="text-sm text-gray-500">
+          Your application must be approved before zone assignment.
+        </p>
+      </div>
+    );
   }
 
-  const handleSubmit = () => {
-    setZone(selectedZone);
-    setZoneCode(code);
-    setBatch(batch);
-  };
+  if (!zone || !zoneCode || !batch) {
+    return (
+      <div className="h-[60vh] flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-sm text-gray-600">
+            Zone not assigned yet.
+          </p>
+          <p className="text-xs text-gray-500 mt-2">
+            Please wait for admin to assign your zone.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-lg mx-auto py-10">
-      <h1 className="text-xl font-semibold mb-6">Zone Assignment</h1>
+    <div className="max-w-lg mx-auto py-12">
+      {/* Header */}
+      <div className="mb-8 text-center">
+        <p className="text-xs uppercase tracking-wide text-gray-500">
+          Onboarding Step
+        </p>
+        <h1 className="text-lg font-medium text-gray-800 mt-1">
+          Zone Assigned
+        </h1>
+        <p className="text-sm text-gray-500 mt-2">
+          Your operational zone has been assigned by admin.
+        </p>
+      </div>
 
-      <div className="flex flex-col gap-4">
-        <input
-          className="border p-2 rounded"
-          placeholder="Zone"
-          value={selectedZone}
-          onChange={(e) => setSelectedZoneLocal(e.target.value)}
-        />
-        <input
-          className="border p-2 rounded"
-          placeholder="Zone Code"
-          value={code}
-          onChange={(e) => setCodeLocal(e.target.value)}
-        />
-        <input
-          className="border p-2 rounded"
-          placeholder="Batch"
-          value={batch}
-          onChange={(e) => setBatchLocal(e.target.value)}
-        />
+      {/* Zone Details */}
+      <div className="bg-white border border-gray-200/60 rounded-lg p-6 space-y-4">
+        <ReadOnlyField label="Zone" value={zone} />
+        <ReadOnlyField label="Zone Code" value={zoneCode} />
+        <ReadOnlyField label="Batch" value={batch} />
+      </div>
 
-        <button
-          className="px-6 py-2 bg-blue-600 text-white rounded"
-          onClick={handleSubmit}
-        >
-          Save & Continue
-        </button>
-
+      {/* Next Step */}
+      <div className="mt-8 text-center">
         <a
           href="/partners/onboarding/buy-toolkit"
-          className="text-blue-600 underline mt-4"
+          className="inline-block px-6 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 transition"
         >
-          Proceed to Toolkit Purchases →
+          Proceed to Toolkit Purchase →
         </a>
       </div>
     </div>
   );
 }
+
+/* =============================
+   Read Only Field
+============================= */
+
+const ReadOnlyField = ({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) => (
+  <div>
+    <p className="text-xs text-gray-500">{label}</p>
+    <p className="text-sm font-medium text-gray-800 mt-1">
+      {value}
+    </p>
+  </div>
+);

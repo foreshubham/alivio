@@ -1,18 +1,26 @@
-import React from "react";
-
-interface StatsCardProps {
+interface Props {
   title: string;
   value: number;
   icon: React.ReactNode;
+  onClick?: () => void;
 }
 
-const StatsCard: React.FC<StatsCardProps> = ({ title, value, icon }) => {
+const StatsCard = ({ title, value, icon, onClick }: Props) => {
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md flex items-center gap-4">
-      <div className="text-3xl text-blue-600">{icon}</div>
-      <div>
-        <h3 className="text-xl font-semibold">{title}</h3>
-        <p className="text-lg text-gray-700">{value}</p>
+    <div
+      onClick={onClick}
+      className={`bg-white border border-gray-200/60 rounded-lg p-5 transition ${
+        onClick ? "cursor-pointer hover:shadow-sm" : ""
+      }`}
+    >
+      <div className="flex justify-between items-center">
+        <div>
+          <p className="text-xs text-gray-500">{title}</p>
+          <p className="text-xl font-semibold mt-1">
+            {value}
+          </p>
+        </div>
+        {icon}
       </div>
     </div>
   );
