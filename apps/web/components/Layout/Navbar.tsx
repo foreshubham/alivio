@@ -2,30 +2,32 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FiMenu,
   FiX,
   FiSearch,
-  FiChevronDown,
   FiShoppingCart,
   FiUser,
 } from "react-icons/fi";
 import theme from "@/theme/theme";
 import { FaFacebook, FaInstagram, FaLinkedin } from "react-icons/fa";
+import { useCart } from "@/contexts/cartContext";
 
 export default function PartnerNavbar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [serviceOpen, setServiceOpen] = useState(false);
-  const [otherOpen, setOtherOpen] = useState(false);
-  const [desktopServiceOpen, setDesktopServiceOpen] = useState(false);
-  const [desktopOtherOpen, setDesktopOtherOpen] = useState(false);
   const [userHover, setUserHover] = useState(false);
+  const { cart } = useCart();
+  const router = useRouter();
 
   return (
     <header className="shadow-sm w-full bg-white">
       {/* MOBILE NAVBAR */}
-      <div className="md:hidden flex justify-between items-center px-6 py-4 max-w-7xl mx-auto">
+      <div
+        style={{ backgroundColor: theme.mainBgColor }}
+        className="md:hidden flex justify-between items-center px-6 py-4 max-w-7xl mx-auto text-white"
+      >
         <button
           onClick={() => setDrawerOpen(true)}
           className="text-3xl"
@@ -34,16 +36,24 @@ export default function PartnerNavbar() {
           <FiMenu />
         </button>
 
-       <Link href="/"> <img src="/logo.jpg" alt="Logo" className="w-28" /></Link>
+        <Link href="/">
+          <img src="/logo.jpg" alt="Logo" className="w-28" />
+        </Link>
 
-        <div className="relative cursor-pointer" aria-label="Cart">
+        <div
+          className="relative cursor-pointer"
+          aria-label="Cart"
+          onClick={() => router.push("/partners/cart")}
+        >
           <FiShoppingCart size={24} />
-          <span
-            className="absolute -top-1 -right-2 text-white text-xs px-1.5 rounded-full"
-            style={{ backgroundColor: theme.mainBgColor }}
-          >
-            1
-          </span>
+          {cart.length > 0 && (
+            <span
+              className="absolute -top-1 -right-2 text-white text-xs px-1.5 rounded-full"
+              style={{ backgroundColor: "#000" }}
+            >
+              {cart.length}
+            </span>
+          )}
         </div>
       </div>
 
@@ -55,7 +65,7 @@ export default function PartnerNavbar() {
         <div className="flex text-sm justify-between items-center gap-10 max-w-7xl w-full px-6">
           <p>+91 9051551925</p>
           <p>Partner Services at your doorstep</p>
-          <div className="flex gap-2 items-center">
+          <div className="flex gap-3 items-center">
             <FaInstagram />
             <FaLinkedin />
             <FaFacebook />
@@ -65,91 +75,23 @@ export default function PartnerNavbar() {
 
       {/* DESKTOP NAVBAR */}
       <div className="hidden md:flex justify-between items-center px-6 py-4 max-w-7xl mx-auto">
-        <img src="/logo.jpg" alt="Logo" className="w-28" />
+        <Link href="/">
+          <img src="/logo.jpg" alt="Logo" className="w-28" />
+        </Link>
 
         {/* Menu Links */}
         <div className="flex items-center space-x-6 font-medium text-black">
           <Link href="/">Home</Link>
           <Link href="/about">About Us</Link>
-
-          {/* Desktop Our Service Dropdown */}
-          {/* <div
-            className="relative"
-            onMouseEnter={() => setDesktopServiceOpen(true)}
-            onMouseLeave={() => setDesktopServiceOpen(false)}
-          >
-            <button className="flex items-center gap-1">
-              Our Services <FiChevronDown />
-            </button>
-            <AnimatePresence>
-              {desktopServiceOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="absolute left-0 top-full mt-2 bg-white shadow-md rounded-md overflow-hidden z-50"
-                >
-                  <Link
-                    href="/service/cleaning"
-                    className="block px-4 py-2 hover:bg-gray-100"
-                  >
-                    Cleaning
-                  </Link>
-                  <Link
-                    href="/service/plumbing"
-                    className="block px-4 py-2 hover:bg-gray-100"
-                  >
-                    Plumbing
-                  </Link>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div> */}
-
-          {/* Desktop Other Services Dropdown */}
-          {/* <div
-            className="relative"
-            onMouseEnter={() => setDesktopOtherOpen(true)}
-            onMouseLeave={() => setDesktopOtherOpen(false)}
-          >
-            <button className="flex items-center gap-1">
-              Other Services <FiChevronDown />
-            </button>
-            <AnimatePresence>
-              {desktopOtherOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="absolute left-0 top-full mt-2 bg-white shadow-md rounded-md overflow-hidden z-50"
-                >
-                  <Link
-                    href="/other/electrician"
-                    className="block px-4 py-2 hover:bg-gray-100"
-                  >
-                    Electrician
-                  </Link>
-                  <Link
-                    href="/other/painting"
-                    className="block px-4 py-2 hover:bg-gray-100"
-                  >
-                    Painting
-                  </Link>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div> */}
-
-          <Link href="/partners">Partners</Link>
+          <Link href="/partners">Become a Partner</Link>
           <Link href="/contact-us">Contact Us</Link>
-      
         </div>
 
-        {/* Icons: Search, User, Cart */}
+        {/* Icons */}
         <div className="flex items-center space-x-4 relative">
           <FiSearch size={20} className="cursor-pointer" />
 
-          {/* User Icon with hover menu */}
+          {/* User Icon */}
           <div
             className="relative"
             onMouseEnter={() => setUserHover(true)}
@@ -181,14 +123,20 @@ export default function PartnerNavbar() {
             </AnimatePresence>
           </div>
 
-          <div className="relative cursor-pointer">
+          {/* Cart Icon */}
+          <div
+            className="relative cursor-pointer"
+            onClick={() => router.push("/cart")}
+          >
             <FiShoppingCart size={24} />
-            <span
-              className="absolute -top-1 -right-2 text-white text-xs px-1.5 rounded-full"
-              style={{ backgroundColor: theme.mainBgColor }}
-            >
-              1
-            </span>
+            {cart.length > 0 && (
+              <span
+                className="absolute -top-1 -right-2 text-white text-xs px-1.5 rounded-full"
+                style={{ backgroundColor: theme.mainBgColor }}
+              >
+                {cart.length}
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -203,7 +151,6 @@ export default function PartnerNavbar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setDrawerOpen(false)}
-              aria-hidden="true"
             />
 
             <motion.nav
@@ -212,9 +159,37 @@ export default function PartnerNavbar() {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", stiffness: 260, damping: 22 }}
-              aria-label="Mobile menu"
             >
-              {/* Mobile menu content remains the same */}
+              <div className="flex justify-between items-center mb-6">
+                <img src="/logo.jpg" alt="Logo" className="w-24" />
+                <button
+                  className="text-[#000000]"
+                  onClick={() => setDrawerOpen(false)}
+                >
+                  <FiX size={24} />
+                </button>
+              </div>
+
+              <nav className="flex flex-col space-y-4 font-medium text-[#000000]">
+                <Link href="/" onClick={() => setDrawerOpen(false)}>
+                  Home
+                </Link>
+                <Link href="/about" onClick={() => setDrawerOpen(false)}>
+                  About Us
+                </Link>
+                <Link href="/partners" onClick={() => setDrawerOpen(false)}>
+                  Become a Partner
+                </Link>
+                <Link href="/contact-us" onClick={() => setDrawerOpen(false)}>
+                  Contact Us
+                </Link>
+                <Link href="/login" onClick={() => setDrawerOpen(false)}>
+                  Login
+                </Link>
+                <Link href="/register" onClick={() => setDrawerOpen(false)}>
+                  Register
+                </Link>
+              </nav>
             </motion.nav>
           </>
         )}

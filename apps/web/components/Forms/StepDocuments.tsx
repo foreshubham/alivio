@@ -1,5 +1,8 @@
+"use client";
+
 import React from "react";
 import { useRegistration } from "@/contexts/RegistrationContext";
+import { toast } from "sonner";
 
 const documentFields: { name: keyof FormData; label: string }[] = [
   { name: "aadhaar", label: "Aadhaar *" },
@@ -19,18 +22,24 @@ export default function StepDocuments() {
     e: React.ChangeEvent<HTMLInputElement>,
     field: keyof FormData
   ) => {
-    if (e.target.files && e.target.files[0]) {
-      updateForm({ [field]: e.target.files[0] } as any);
+    const file = e.target.files?.[0];
+
+    if (!file) {
+      toast.warning("No file selected");
+      return;
     }
+
+    updateForm({ [field]: file } as any);
+    toast.success(`${file.name} uploaded`);
   };
 
   const handleRemove = (field: keyof FormData) => {
     updateForm({ [field]: null } as any);
+    toast.info("File removed");
   };
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Page Title */}
       <h2 className="text-xl font-semibold text-gray-800 border-b pb-2">
         Upload Required Documents
       </h2>
@@ -45,7 +54,6 @@ export default function StepDocuments() {
               {doc.label}
             </label>
 
-            {/* Upload Field */}
             <input
               type="file"
               accept="image/*,application/pdf"
@@ -57,7 +65,6 @@ export default function StepDocuments() {
               }`}
             />
 
-            {/* File Preview Chip */}
             {isFile && (
               <div className="flex items-center justify-between mt-2 bg-gray-100 p-2 rounded-lg shadow-sm">
                 <span className="truncate text-sm text-gray-700">
@@ -68,13 +75,13 @@ export default function StepDocuments() {
                   type="button"
                   onClick={() => handleRemove(doc.name)}
                   className="text-red-600 font-bold text-lg px-2"
+                  aria-label={`Remove ${doc.label}`}
                 >
                   ×
                 </button>
               </div>
             )}
 
-            {/* Validation Error */}
             {errors[doc.name] && (
               <p className="text-red-600 text-sm mt-1">{errors[doc.name]}</p>
             )}

@@ -7,7 +7,7 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 /* -----------------------------
   Types

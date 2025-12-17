@@ -1,5 +1,8 @@
+"use client";
+
 import React, { useState } from "react";
 import { useRegistration } from "@/contexts/RegistrationContext";
+import { toast } from "sonner";
 
 export default function StepPayment() {
   const { completePayment } = useRegistration();
@@ -7,8 +10,14 @@ export default function StepPayment() {
 
   const handlePayment = async () => {
     setLoading(true);
-    await completePayment();
-    setLoading(false);
+    try {
+      await completePayment(); // already handles success/failure toasts
+    } catch (err) {
+      toast.error("An error occurred during payment.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

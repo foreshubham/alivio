@@ -7,9 +7,13 @@ import Navbar from "@/components/Layout/Navbar";
 
 import { RegistrationProvider } from "@/contexts/RegistrationContext";
 import { OnboardingProvider } from "@/contexts/onboardingContext";
+import { CartProvider } from "@/contexts/cartContext";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
@@ -21,7 +25,11 @@ export const metadata: Metadata = {
   description: "Partner onboarding portal",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
       <body
@@ -29,9 +37,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       >
         <RegistrationProvider>
           <OnboardingProvider>
-            <Navbar />
-            {children}
-            <Footer />
+            <CartProvider>
+              <Navbar />
+              {children}
+              <Footer />
+            </CartProvider>
           </OnboardingProvider>
         </RegistrationProvider>
       </body>
