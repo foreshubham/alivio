@@ -8,6 +8,8 @@ import Navbar from "@/components/Layout/Navbar";
 import { RegistrationProvider } from "@/contexts/RegistrationContext";
 import { OnboardingProvider } from "@/contexts/onboardingContext";
 import { CartProvider } from "@/contexts/cartContext";
+import { AdminApplicationsProvider } from "@/contexts/adminContext";
+import { PartnersProvider } from "@/contexts/partnerContext";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({
@@ -35,15 +37,19 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} antialiased`}
       >
-        <RegistrationProvider>
-          <OnboardingProvider>
-            <CartProvider>
-              <Navbar />
-              {children}
-              <Footer />
-            </CartProvider>
-          </OnboardingProvider>
-        </RegistrationProvider>
+        <AdminApplicationsProvider>
+          <RegistrationProvider>
+            <OnboardingProvider>
+              <PartnersProvider>
+                <CartProvider>
+                  <Navbar />
+                  {children}
+                  <Footer />
+                </CartProvider>
+              </PartnersProvider>
+            </OnboardingProvider>
+          </RegistrationProvider>
+        </AdminApplicationsProvider>
       </body>
     </html>
   );

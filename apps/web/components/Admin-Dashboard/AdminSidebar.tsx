@@ -1,52 +1,86 @@
-import React from "react";
-import { useRouter } from "next/navigation";
-import { FiHome, FiUser, FiSettings, FiLogOut } from "react-icons/fi";
+"use client";
 
-const Sidebar = () => {
-  const router = useRouter();
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  FiGrid,
+  FiFileText,
+  FiUsers,
+  FiCreditCard,
+  FiSettings,
+} from "react-icons/fi";
 
-  const navigate = (path: string) => {
-    router.push(path);
-  };
+const menu = [
+  {
+    label: "Dashboard",
+    href: "/admin",
+    icon: FiGrid,
+  },
+  {
+    label: "Applications",
+    href: "/admin/applications",
+    icon: FiFileText,
+  },
+  {
+    label: "Partners",
+    href: "/admin/partners",
+    icon: FiUsers,
+  },
+  {
+    label: "Payments",
+    href: "/admin/payments",
+    icon: FiCreditCard,
+  },
+  {
+    label: "Settings",
+    href: "/admin/settings",
+    icon: FiSettings,
+  },
+];
+
+export default function AdminSidebar() {
+  const pathname = usePathname();
 
   return (
-    <div className="bg-blue-800 text-white w-64 h-screen p-5 flex flex-col">
-      <div className="mb-10">
-        <h2 className="text-3xl font-bold">Admin Dashboard</h2>
+    <aside className="w-64 bg-white/80 backdrop-blur border-r border-gray-200/60 flex flex-col">
+      {/* Brand */}
+      <div className="h-16 flex items-center px-6 border-b border-gray-200/60">
+        <span className="text-lg font-semibold text-gray-900">
+          Alivio Admin
+        </span>
       </div>
 
-      <nav className="flex flex-col space-y-4">
-        <button
-          onClick={() => navigate("/admin/applications")}
-          className="flex items-center gap-2 text-lg hover:bg-blue-700 p-2 rounded-md"
-        >
-          <FiHome />
-          Applications
-        </button>
-        <button
-          onClick={() => navigate("/admin/users")}
-          className="flex items-center gap-2 text-lg hover:bg-blue-700 p-2 rounded-md"
-        >
-          <FiUser />
-          Users
-        </button>
-        <button
-          onClick={() => navigate("/admin/settings")}
-          className="flex items-center gap-2 text-lg hover:bg-blue-700 p-2 rounded-md"
-        >
-          <FiSettings />
-          Settings
-        </button>
-        <button
-          onClick={() => navigate("/logout")}
-          className="flex items-center gap-2 text-lg hover:bg-blue-700 p-2 rounded-md mt-auto"
-        >
-          <FiLogOut />
-          Logout
-        </button>
-      </nav>
-    </div>
-  );
-};
+      {/* Navigation */}
+      <nav className="flex-1 px-3 py-4 space-y-1">
+        {menu.map((item) => {
+          const active = pathname === item.href;
+          const Icon = item.icon;
 
-export default Sidebar;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
+                ${
+                  active
+                    ? "bg-blue-50 text-blue-600 shadow-sm"
+                    : "text-gray-700 hover:bg-gray-100/70"
+                }`}
+            >
+              <Icon
+                size={18}
+                className={active ? "text-blue-600" : "text-gray-500"}
+              />
+              {item.label}
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Footer */}
+      <div className="px-6 py-4 border-t border-gray-200/60 text-xs text-gray-500">
+        © {new Date().getFullYear()} Alivio
+      </div>
+    </aside>
+  );
+}

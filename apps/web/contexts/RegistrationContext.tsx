@@ -8,6 +8,8 @@ import React, {
   ReactNode,
 } from "react";
 import { toast } from "sonner";
+import { useAdminApplications } from "@/contexts/adminContext";
+import { PartnerApplication } from "@/types/application";
 
 /* -----------------------------
   Types
@@ -106,20 +108,22 @@ const RegistrationContext = createContext<RegistrationContextType | undefined>(
 );
 
 /* --------------------------------------------------------
-   🔥 MAIN PROVIDER WITH LOCALSTORAGE PERSISTENCE
+   🔥 MAIN PROVIDER WITH ADMIN HANDOFF
 -------------------------------------------------------- */
 export function RegistrationProvider({ children }: { children: ReactNode }) {
-  const [currentStep, setCurrentStep] = useState<number>(1);
+  const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [otpSent, setOtpSent] = useState<boolean>(false);
-  const [otpVerified, setOtpVerified] = useState<boolean>(false);
-  const [paymentSuccess, setPaymentSuccess] = useState<boolean>(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [applicationId, setApplicationId] = useState<string | null>(null);
 
-  /* ----------------------------------------------------
-      📌  RESTORE STATE FROM LOCALSTORAGE ON LOAD
-  ---------------------------------------------------- */
+  const { addApplication } = useAdminApplications();
+
+  /* -----------------------------
+     Restore from localStorage
+  ------------------------------*/
   useEffect(() => {
     const savedForm = localStorage.getItem("reg_form");
     const savedStep = localStorage.getItem("reg_step");
@@ -136,9 +140,9 @@ export function RegistrationProvider({ children }: { children: ReactNode }) {
     if (savedAppId) setApplicationId(savedAppId);
   }, []);
 
-  /* ----------------------------------------------------
-      📌  SAVE STATE TO LOCALSTORAGE ON CHANGE
-  ---------------------------------------------------- */
+  /* -----------------------------
+     Persist to localStorage
+  ------------------------------*/
   useEffect(() => {
     localStorage.setItem("reg_form", JSON.stringify(formData));
   }, [formData]);
@@ -160,13 +164,12 @@ export function RegistrationProvider({ children }: { children: ReactNode }) {
   }, [paymentSuccess]);
 
   useEffect(() => {
-    if (applicationId)
-      localStorage.setItem("reg_app_id", applicationId);
+    if (applicationId) localStorage.setItem("reg_app_id", applicationId);
   }, [applicationId]);
 
-  /* ----------------------------------------------------
-      VALIDATIONS
-  ---------------------------------------------------- */
+  /* -----------------------------
+     VALIDATIONS
+  ------------------------------*/
   const validateStep = (step: number) => {
     const e: Record<string, string> = {};
 
@@ -191,11 +194,6 @@ export function RegistrationProvider({ children }: { children: ReactNode }) {
       if (!formData.technicianType) e.technicianType = "Required";
       if (!formData.educationQualification)
         e.educationQualification = "Required";
-      if (
-        isNaN(Number(formData.experienceYears)) ||
-        Number(formData.experienceYears) < 0
-      )
-        e.experienceYears = "Invalid experience";
     }
 
     if (step === 4) {
@@ -219,18 +217,13 @@ export function RegistrationProvider({ children }: { children: ReactNode }) {
     }
 
     setErrors(e);
-
-    if (Object.keys(e).length > 0) {
-      const first = Object.values(e)[0];
-      toast.error(first);
-    }
-
+    if (Object.keys(e).length > 0) toast.error(Object.values(e)[0]);
     return Object.keys(e).length === 0;
   };
 
-  /* ----------------------------------------------------
-      NAVIGATION
-  ---------------------------------------------------- */
+  /* -----------------------------
+     NAVIGATION
+  ------------------------------*/
   const nextStep = () => {
     if (!validateStep(currentStep)) return false;
     setCurrentStep((s) => Math.min(s + 1, 7));
@@ -244,26 +237,24 @@ export function RegistrationProvider({ children }: { children: ReactNode }) {
 
   const goToStep = (s: number) => {
     if (s < currentStep) return setCurrentStep(s);
-
-    for (let x = currentStep; x < s; x++) {
-      if (!validateStep(x)) return;
+    for (let i = currentStep; i < s; i++) {
+      if (!validateStep(i)) return;
     }
-
     setCurrentStep(s);
   };
 
-  /* ----------------------------------------------------
-      FORM UPDATES
-  ---------------------------------------------------- */
+  /* -----------------------------
+     FORM
+  ------------------------------*/
   const updateForm = (patch: Partial<FormData>) => {
     setFormData((prev) => ({ ...prev, ...patch }));
   };
 
   const setForm = (data: FormData) => setFormData(data);
 
-  /* ----------------------------------------------------
-      OTP
-  ---------------------------------------------------- */
+  /* -----------------------------
+     OTP
+  ------------------------------*/
   const sendOtp = async () => {
     if (!/^\d{10}$/.test(formData.phone)) {
       toast.error("Enter valid phone number");
@@ -283,9 +274,9 @@ export function RegistrationProvider({ children }: { children: ReactNode }) {
     return false;
   };
 
-  /* ----------------------------------------------------
-      PAYMENT
-  ---------------------------------------------------- */
+  /* -----------------------------
+     🔥 PAYMENT → ADMIN HANDOFF
+  ------------------------------*/
   const completePayment = async () => {
     if (!validateStep(6)) return;
 
@@ -293,15 +284,25 @@ export function RegistrationProvider({ children }: { children: ReactNode }) {
     await new Promise((r) => setTimeout(r, 1000));
 
     const id = `APP-${Math.floor(100000 + Math.random() * 900000)}`;
+
+    const application: PartnerApplication = {
+      applicationId: id,
+      submittedAt: new Date().toISOString(),
+      status: "PENDING",
+      formData,
+    };
+
+    addApplication(application); // 🔥 SEND TO ADMIN
+
     setApplicationId(id);
     setPaymentSuccess(true);
 
-    toast.success("Payment successful!");
+    toast.success("Application submitted successfully!");
   };
 
-  /* ----------------------------------------------------
-      RESET EVERYTHING
-  ---------------------------------------------------- */
+  /* -----------------------------
+     RESET
+  ------------------------------*/
   const reset = () => {
     setCurrentStep(1);
     setFormData(initialFormData);
@@ -311,12 +312,7 @@ export function RegistrationProvider({ children }: { children: ReactNode }) {
     setPaymentSuccess(false);
     setApplicationId(null);
 
-    localStorage.removeItem("reg_form");
-    localStorage.removeItem("reg_step");
-    localStorage.removeItem("reg_payment");
-    localStorage.removeItem("reg_otp_sent");
-    localStorage.removeItem("reg_otp_verified");
-    localStorage.removeItem("reg_app_id");
+    localStorage.clear();
   };
 
   return (

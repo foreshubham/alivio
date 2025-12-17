@@ -8,6 +8,10 @@ import {
   ReactNode,
 } from "react";
 
+/* =============================
+   TYPES
+============================= */
+
 export interface ToolkitItem {
   id: string;
   name: string;
@@ -17,18 +21,21 @@ export interface ToolkitItem {
 }
 
 interface OnboardingContextType {
+  /* -------- ADMIN CONTROLLED -------- */
   approved: boolean;
-  setApproved: (value: boolean) => void;
-
   zone: string | null;
-  setZone: (value: string | null) => void;
-
   zoneCode: string | null;
-  setZoneCode: (value: string | null) => void;
-
   batch: string | null;
-  setBatch: (value: string | null) => void;
 
+  /** Admin-only updater (called from Admin panel) */
+  adminAssignZone: (data: {
+    approved: boolean;
+    zone: string;
+    zoneCode: string;
+    batch: string;
+  }) => void;
+
+  /* -------- VENDOR CONTROLLED -------- */
   toolkits: ToolkitItem[];
   markToolkitPaid: (id: string, deliveryDate: string) => void;
 
@@ -42,6 +49,10 @@ interface OnboardingContextType {
 
 const OnboardingContext = createContext<OnboardingContextType | null>(null);
 
+/* =============================
+   INITIAL TOOLKITS
+============================= */
+
 const initialToolkits: ToolkitItem[] = [
   { id: "tshirt", name: "T-Shirt (2 Sets)", price: 499, paid: false, deliveryDate: null },
   { id: "ac", name: "Tool-Kit AC", price: 2499, paid: false, deliveryDate: null },
@@ -51,53 +62,77 @@ const initialToolkits: ToolkitItem[] = [
 ];
 
 export function OnboardingProvider({ children }: { children: ReactNode }) {
+  /* -------- ADMIN DATA -------- */
   const [approved, setApproved] = useState(false);
   const [zone, setZone] = useState<string | null>(null);
   const [zoneCode, setZoneCode] = useState<string | null>(null);
   const [batch, setBatch] = useState<string | null>(null);
+
+  /* -------- VENDOR DATA -------- */
   const [toolkits, setToolkits] = useState<ToolkitItem[]>(initialToolkits);
   const [proId, setProId] = useState<string | null>(null);
 
   /* -------------------------------------------
-     📌 Load onboarding data from localStorage
+     📌 LOAD FROM LOCAL STORAGE
   ------------------------------------------- */
   useEffect(() => {
     const saved = localStorage.getItem("onboarding_data");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
+    if (!saved) return;
 
-        setApproved(parsed.approved ?? false);
-        setZone(parsed.zone ?? null);
-        setZoneCode(parsed.zoneCode ?? null);
-        setBatch(parsed.batch ?? null);
+    try {
+      const parsed = JSON.parse(saved);
 
-        setToolkits(parsed.toolkits ?? initialToolkits);
-        setProId(parsed.proId ?? null);
+      setApproved(parsed.approved ?? false);
+      setZone(parsed.zone ?? null);
+      setZoneCode(parsed.zoneCode ?? null);
+      setBatch(parsed.batch ?? null);
+      setToolkits(parsed.toolkits ?? initialToolkits);
+      setProId(parsed.proId ?? null);
 
-      } catch (err) {
-        console.error("Failed to restore onboarding data:", err);
-      }
+    } catch (err) {
+      console.error("Failed to restore onboarding data", err);
     }
   }, []);
 
   /* -------------------------------------------
-     📌 Save onboarding data whenever something changes
+     📌 SAVE TO LOCAL STORAGE
   ------------------------------------------- */
   useEffect(() => {
-    const data = {
-      approved,
-      zone,
-      zoneCode,
-      batch,
-      toolkits,
-      proId,
-    };
-    localStorage.setItem("onboarding_data", JSON.stringify(data));
+    localStorage.setItem(
+      "onboarding_data",
+      JSON.stringify({
+        approved,
+        zone,
+        zoneCode,
+        batch,
+        toolkits,
+        proId,
+      })
+    );
   }, [approved, zone, zoneCode, batch, toolkits, proId]);
 
   /* -------------------------------------------
-     MARK TOOLKIT PAID
+     🔐 ADMIN ASSIGNS ZONE + APPROVAL
+  ------------------------------------------- */
+  const adminAssignZone = ({
+    approved,
+    zone,
+    zoneCode,
+    batch,
+  }: {
+    approved: boolean;
+    zone: string;
+    zoneCode: string;
+    batch: string;
+  }) => {
+    setApproved(approved);
+    setZone(zone);
+    setZoneCode(zoneCode);
+    setBatch(batch);
+  };
+
+  /* -------------------------------------------
+     VENDOR: TOOLKIT PAYMENT
   ------------------------------------------- */
   const markToolkitPaid = (id: string, deliveryDate: string) => {
     setToolkits((prev) =>
@@ -108,20 +143,21 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   };
 
   /* -------------------------------------------
-     GENERATE PRO ID
+     SYSTEM: GENERATE PRO ID
   ------------------------------------------- */
   const generateProId = () => {
+    if (proId) return;
     const id = "PRO-" + Math.floor(100000 + Math.random() * 900000);
     setProId(id);
   };
 
   /* -------------------------------------------
-     ALL TOOLKITS PAID CHECK
+     COMPUTED
   ------------------------------------------- */
   const allToolkitsPaid = toolkits.every((t) => t.paid);
 
   /* -------------------------------------------
-     RESET ONBOARDING
+     RESET
   ------------------------------------------- */
   const resetOnboarding = () => {
     setApproved(false);
@@ -130,7 +166,6 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     setBatch(null);
     setToolkits(initialToolkits);
     setProId(null);
-
     localStorage.removeItem("onboarding_data");
   };
 
@@ -138,16 +173,11 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     <OnboardingContext.Provider
       value={{
         approved,
-        setApproved,
-
         zone,
-        setZone,
-
         zoneCode,
-        setZoneCode,
-
         batch,
-        setBatch,
+
+        adminAssignZone,
 
         toolkits,
         markToolkitPaid,
@@ -167,6 +197,8 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
 export const useOnboarding = () => {
   const ctx = useContext(OnboardingContext);
-  if (!ctx) throw new Error("useOnboarding must be used inside OnboardingProvider");
+  if (!ctx) {
+    throw new Error("useOnboarding must be used inside OnboardingProvider");
+  }
   return ctx;
 };
