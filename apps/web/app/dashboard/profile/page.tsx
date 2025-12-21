@@ -2,8 +2,6 @@
 import React, { useState } from "react";
 import { toast, Toaster } from "sonner";
 
-import DashboardLayout from "../layout";
-
 const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({

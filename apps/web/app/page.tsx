@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import InfiniteImageScroller from "@/components/UI/InfiniteImageScroller";
 
 /* =====================================================
    DESIGN SYSTEM PRIMITIVES 
@@ -24,15 +25,11 @@ function Section({
   className?: string;
 }) {
   return (
-    <section
-      {...props}
-      className={`py-24 ${className}`}
-    >
+    <section {...props} className={`py-24 ${className}`}>
       {children}
     </section>
   );
 }
-
 
 function Hero() {
   return (
@@ -49,8 +46,8 @@ function Hero() {
             </h1>
 
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-slate-600">
-              Alivio Technology enables partners to build, operate, and scale with
-              stable systems, structured onboarding, and long-term support.
+              Alivio Technology enables partners to build, operate, and scale
+              with stable systems, structured onboarding, and long-term support.
             </p>
 
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
@@ -89,6 +86,17 @@ function Hero() {
             </div>
           </motion.div>
         </div>
+
+        <InfiniteImageScroller
+          container="7xl"
+          speed={45}
+          images={[
+            { src: "/logo.jpg" },
+            { src: "/logo.jpg" },
+            { src: "/logo.jpg" },
+            { src: "/logo.jpg" },
+          ]}
+        />
       </Container>
     </Section>
   );
@@ -259,7 +267,9 @@ function Pricing() {
           <h2 className="text-2xl font-semibold text-slate-900">
             Partner onboarding fee
           </h2>
-          <div className="mt-6 text-5xl font-semibold text-indigo-600">₹200</div>
+          <div className="mt-6 text-5xl font-semibold text-indigo-600">
+            ₹200
+          </div>
           <p className="mt-3 text-sm text-slate-600">
             One-time, non-refundable
           </p>
