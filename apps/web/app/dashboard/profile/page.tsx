@@ -1,13 +1,11 @@
 "use client";
 import React, { useState } from "react";
-import { ToastContainer, toast } from "react-toastify";
+import { toast, Toaster } from "sonner";
+
 import DashboardLayout from "../layout";
 
-// Make sure to import the styles for react-toastify
-import "react-toastify/dist/ReactToastify.css";
-
 const Profile = () => {
-  const [isEditing, setIsEditing] = useState(false); // State to toggle edit mode
+  const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
     name: "John Doe",
     email: "john.doe@example.com",
@@ -18,7 +16,6 @@ const Profile = () => {
     dob: "1990-01-01",
   });
 
-  // Handle changes in the form fields
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setProfileData((prev) => ({
@@ -27,141 +24,124 @@ const Profile = () => {
     }));
   };
 
-  // Handle form submission and save profile data
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Profile updated successfully!"); // Display success toast
-    setIsEditing(false); // Switch back to view mode
-    // Here, you can make an API call to save the updated profile data
+
+    toast.success("Profile updated successfully!");
+    setIsEditing(false);
+
     console.log("Updated Profile Data:", profileData);
   };
 
   return (
-  <>
-  
+    <>
       <h2 className="text-2xl font-semibold mb-4">Your Profile</h2>
+
       <div className="bg-white p-6 rounded-lg shadow-md">
         <form onSubmit={handleSave}>
           <div className="space-y-4">
-            {/* Name Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700" htmlFor="name">
+              <label className="block text-sm font-medium text-gray-700">
                 Name
               </label>
               <input
                 type="text"
-                id="name"
                 name="name"
                 value={profileData.name}
                 onChange={handleChange}
-                className="mt-1 p-2 w-full border border-gray-300 rounded"
                 disabled={!isEditing}
+                className="mt-1 p-2 w-full border rounded"
               />
             </div>
 
-            {/* Email Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700" htmlFor="email">
+              <label className="block text-sm font-medium text-gray-700">
                 Email
               </label>
               <input
                 type="email"
-                id="email"
-                name="email"
                 value={profileData.email}
-                onChange={handleChange}
-                className="mt-1 p-2 w-full border border-gray-300 rounded"
                 disabled
+                className="mt-1 p-2 w-full border rounded bg-gray-100"
               />
             </div>
 
-            {/* Phone Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700" htmlFor="phone">
+              <label className="block text-sm font-medium text-gray-700">
                 Phone
               </label>
               <input
                 type="text"
-                id="phone"
                 name="phone"
                 value={profileData.phone}
                 onChange={handleChange}
-                className="mt-1 p-2 w-full border border-gray-300 rounded"
                 disabled={!isEditing}
+                className="mt-1 p-2 w-full border rounded"
               />
             </div>
 
-            {/* Address Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700" htmlFor="address">
+              <label className="block text-sm font-medium text-gray-700">
                 Address
               </label>
               <input
                 type="text"
-                id="address"
                 name="address"
                 value={profileData.address}
                 onChange={handleChange}
-                className="mt-1 p-2 w-full border border-gray-300 rounded"
                 disabled={!isEditing}
+                className="mt-1 p-2 w-full border rounded"
               />
             </div>
 
-            {/* District Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700" htmlFor="district">
+              <label className="block text-sm font-medium text-gray-700">
                 District
               </label>
               <input
                 type="text"
-                id="district"
                 name="district"
                 value={profileData.district}
                 onChange={handleChange}
-                className="mt-1 p-2 w-full border border-gray-300 rounded"
                 disabled={!isEditing}
+                className="mt-1 p-2 w-full border rounded"
               />
             </div>
 
-            {/* Pin Code Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700" htmlFor="pinCode">
+              <label className="block text-sm font-medium text-gray-700">
                 Pin Code
               </label>
               <input
                 type="text"
-                id="pinCode"
                 name="pinCode"
                 value={profileData.pinCode}
                 onChange={handleChange}
-                className="mt-1 p-2 w-full border border-gray-300 rounded"
                 disabled={!isEditing}
+                className="mt-1 p-2 w-full border rounded"
               />
             </div>
 
-            {/* Date of Birth Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700" htmlFor="dob">
+              <label className="block text-sm font-medium text-gray-700">
                 Date of Birth
               </label>
               <input
                 type="date"
-                id="dob"
                 name="dob"
                 value={profileData.dob}
                 onChange={handleChange}
-                className="mt-1 p-2 w-full border border-gray-300 rounded"
                 disabled={!isEditing}
+                className="mt-1 p-2 w-full border rounded"
               />
             </div>
 
-            {/* Buttons */}
-            <div className="mt-4 flex gap-4">
+            <div className="flex gap-4 mt-4">
               {!isEditing ? (
                 <button
                   type="button"
                   onClick={() => setIsEditing(true)}
-                  className="bg-blue-600 text-white p-3 rounded-md hover:bg-blue-700 w-full"
+                  className="bg-blue-600 text-white p-3 rounded w-full"
                 >
                   Edit Profile
                 </button>
@@ -169,14 +149,14 @@ const Profile = () => {
                 <>
                   <button
                     type="submit"
-                    className="bg-green-600 text-white p-3 rounded-md hover:bg-green-700 w-full"
+                    className="bg-green-600 text-white p-3 rounded w-full"
                   >
                     Save Changes
                   </button>
                   <button
                     type="button"
                     onClick={() => setIsEditing(false)}
-                    className="bg-gray-600 text-white p-3 rounded-md hover:bg-gray-700 w-full"
+                    className="bg-gray-600 text-white p-3 rounded w-full"
                   >
                     Cancel
                   </button>
@@ -187,9 +167,9 @@ const Profile = () => {
         </form>
       </div>
 
-      {/* Toast container for showing success message */}
-      <ToastContainer />
-  </>
+      {/* Sonner toaster */}
+      <Toaster position="top-right" richColors />
+    </>
   );
 };
 

@@ -18,13 +18,20 @@ function Container({ children }: { children: React.ReactNode }) {
 function Section({
   children,
   className = "",
-}: {
+  ...props
+}: React.HTMLAttributes<HTMLElement> & {
   children: React.ReactNode;
   className?: string;
 }) {
-  return <section className={`py-24 ${className}`}>{children}</section>;
+  return (
+    <section
+      {...props}
+      className={`py-24 ${className}`}
+    >
+      {children}
+    </section>
+  );
 }
-
 
 
 function Hero() {
