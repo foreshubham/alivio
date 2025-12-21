@@ -1,93 +1,89 @@
 "use client";
 
 import React from "react";
-import { useRegistration } from "@/contexts/RegistrationContext";
-import { toast } from "sonner";
 
-const documentFields: { name: keyof FormData; label: string }[] = [
-  { name: "aadhaar", label: "Aadhaar *" },
-  { name: "pan", label: "PAN *" },
-  { name: "eduCert", label: "Educational Certificate *" },
-  { name: "drivingLicense", label: "Driving License *" },
-  { name: "rcBook", label: "RC Book *" },
-  { name: "policeVerification", label: "Police Verification *" },
-  { name: "photo", label: "Photo *" },
-  { name: "cancelCheque", label: "Cancel Cheque *" },
+/* =============================
+   FORM DATA TYPE (RENAMED)
+============================= */
+
+type DocumentFormData = {
+  aadhaar: File | null;
+  pan: File | null;
+  eduCert: File | null;
+  drivingLicense: File | null;
+  rcBook: File | null;
+  policeVerification: File | null;
+  photo: File | null;
+  cancelCheque: File | null;
+};
+
+/* =============================
+   FIELD CONFIG
+============================= */
+
+const documentFields: {
+  name: keyof DocumentFormData;
+  label: string;
+}[] = [
+  { name: "aadhaar", label: "Aadhaar Card" },
+  { name: "pan", label: "PAN Card" },
+  { name: "eduCert", label: "Educational Certificate" },
+  { name: "drivingLicense", label: "Driving License" },
+  { name: "rcBook", label: "RC Book" },
+  { name: "policeVerification", label: "Police Verification" },
+  { name: "photo", label: "Passport Size Photo" },
+  { name: "cancelCheque", label: "Cancelled Cheque" },
 ];
 
+/* =============================
+   COMPONENT
+============================= */
+
 export default function StepDocuments() {
-  const { formData, updateForm, errors } = useRegistration();
+  const [formData, setFormData] = React.useState<DocumentFormData>({
+    aadhaar: null,
+    pan: null,
+    eduCert: null,
+    drivingLicense: null,
+    rcBook: null,
+    policeVerification: null,
+    photo: null,
+    cancelCheque: null,
+  });
 
   const handleFileChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    field: keyof FormData
+    name: keyof DocumentFormData,
+    file: File | null
   ) => {
-    const file = e.target.files?.[0];
-
-    if (!file) {
-      toast.warning("No file selected");
-      return;
-    }
-
-    updateForm({ [field]: file } as any);
-    toast.success(`${file.name} uploaded`);
-  };
-
-  const handleRemove = (field: keyof FormData) => {
-    updateForm({ [field]: null } as any);
-    toast.info("File removed");
+    setFormData((prev) => ({
+      ...prev,
+      [name]: file,
+    }));
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <h2 className="text-xl font-semibold text-gray-800 border-b pb-2">
-        Upload Required Documents
-      </h2>
+    <div className="space-y-6">
+      {documentFields.map((field) => (
+        <div key={field.name} className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">
+            {field.label}
+          </label>
 
-      {documentFields.map((doc) => {
-        const file = formData[doc.name];
-        const isFile = file instanceof File;
+          <input
+            type="file"
+            onChange={(e) =>
+              handleFileChange(field.name, e.target.files?.[0] ?? null)
+            }
+            className="block w-full text-sm text-gray-600"
+          />
 
-        return (
-          <div key={doc.name} className="flex flex-col">
-            <label className="block font-medium mb-1 text-gray-700">
-              {doc.label}
-            </label>
-
-            <input
-              type="file"
-              accept="image/*,application/pdf"
-              onChange={(e) => handleFileChange(e, doc.name)}
-              className={`border rounded-lg p-3 bg-white cursor-pointer focus:outline-none focus:ring-2 ${
-                errors[doc.name]
-                  ? "border-red-500 focus:ring-red-300"
-                  : "border-gray-300 focus:ring-blue-300"
-              }`}
-            />
-
-            {isFile && (
-              <div className="flex items-center justify-between mt-2 bg-gray-100 p-2 rounded-lg shadow-sm">
-                <span className="truncate text-sm text-gray-700">
-                  {(file as File).name}
-                </span>
-
-                <button
-                  type="button"
-                  onClick={() => handleRemove(doc.name)}
-                  className="text-red-600 font-bold text-lg px-2"
-                  aria-label={`Remove ${doc.label}`}
-                >
-                  ×
-                </button>
-              </div>
-            )}
-
-            {errors[doc.name] && (
-              <p className="text-red-600 text-sm mt-1">{errors[doc.name]}</p>
-            )}
-          </div>
-        );
-      })}
+          {formData[field.name] && (
+            <p className="text-xs text-green-600">
+              File selected: {formData[field.name]?.name}
+            </p>
+          )}
+        </div>
+      ))}
     </div>
   );
 }
