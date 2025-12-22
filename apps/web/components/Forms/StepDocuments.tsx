@@ -1,30 +1,9 @@
 "use client";
 
 import React from "react";
+import { useRegistration } from "@/contexts/RegistrationContext";
 
-/* =============================
-   FORM DATA TYPE (RENAMED)
-============================= */
-
-type DocumentFormData = {
-  aadhaar: File | null;
-  pan: File | null;
-  eduCert: File | null;
-  drivingLicense: File | null;
-  rcBook: File | null;
-  policeVerification: File | null;
-  photo: File | null;
-  cancelCheque: File | null;
-};
-
-/* =============================
-   FIELD CONFIG
-============================= */
-
-const documentFields: {
-  name: keyof DocumentFormData;
-  label: string;
-}[] = [
+const documentFields = [
   { name: "aadhaar", label: "Aadhaar Card" },
   { name: "pan", label: "PAN Card" },
   { name: "eduCert", label: "Educational Certificate" },
@@ -33,39 +12,32 @@ const documentFields: {
   { name: "policeVerification", label: "Police Verification" },
   { name: "photo", label: "Passport Size Photo" },
   { name: "cancelCheque", label: "Cancelled Cheque" },
-];
-
-/* =============================
-   COMPONENT
-============================= */
+] as const;
 
 export default function StepDocuments() {
-  const [formData, setFormData] = React.useState<DocumentFormData>({
-    aadhaar: null,
-    pan: null,
-    eduCert: null,
-    drivingLicense: null,
-    rcBook: null,
-    policeVerification: null,
-    photo: null,
-    cancelCheque: null,
-  });
+  const { formData, updateForm } = useRegistration();
 
   const handleFileChange = (
-    name: keyof DocumentFormData,
+    name: typeof documentFields[number]["name"],
     file: File | null
   ) => {
-    setFormData((prev) => ({
-      ...prev,
-      [name]: file,
-    }));
+    if (!file) return;
+
+    const url = URL.createObjectURL(file);
+
+    updateForm({
+      documents: {
+        ...formData.documents,
+        [name]: url, // ✅ CORRECT LOCATION
+      },
+    });
   };
 
   return (
     <div className="space-y-6">
       {documentFields.map((field) => (
         <div key={field.name} className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="text-sm font-medium text-gray-700">
             {field.label}
           </label>
 
@@ -74,13 +46,10 @@ export default function StepDocuments() {
             onChange={(e) =>
               handleFileChange(field.name, e.target.files?.[0] ?? null)
             }
-            className="block w-full text-sm text-gray-600"
           />
 
-          {formData[field.name] && (
-            <p className="text-xs text-green-600">
-              File selected: {formData[field.name]?.name}
-            </p>
+          {formData.documents?.[field.name] && (
+            <p className="text-xs text-green-600">File uploaded</p>
           )}
         </div>
       ))}

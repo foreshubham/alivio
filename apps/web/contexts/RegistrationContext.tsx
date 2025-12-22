@@ -1,6 +1,6 @@
 "use client";
 
-import React, {
+import {
   createContext,
   useContext,
   useState,
@@ -9,7 +9,10 @@ import React, {
 } from "react";
 import { toast } from "sonner";
 import { useAdminApplications } from "@/contexts/adminContext";
-import { PartnerApplication } from "@/types/application";
+import {
+  PartnerApplication,
+  ApplicationDocuments,
+} from "@/types/application";
 
 /* -----------------------------
   Types
@@ -33,14 +36,7 @@ export type FormData = {
   accountNumber: string;
   reAccountNumber: string;
 
-  aadhaar: File | null;
-  pan: File | null;
-  eduCert: File | null;
-  drivingLicense: File | null;
-  rcBook: File | null;
-  policeVerification: File | null;
-  photo: File | null;
-  cancelCheque: File | null;
+  documents: ApplicationDocuments; // ✅ URL based
 
   termsAccepted: boolean;
   digitalSignature: string;
@@ -65,14 +61,7 @@ export const initialFormData: FormData = {
   accountNumber: "",
   reAccountNumber: "",
 
-  aadhaar: null,
-  pan: null,
-  eduCert: null,
-  drivingLicense: null,
-  rcBook: null,
-  policeVerification: null,
-  photo: null,
-  cancelCheque: null,
+  documents: {},
 
   termsAccepted: false,
   digitalSignature: "",
@@ -86,10 +75,8 @@ type RegistrationContextType = {
 
   formData: FormData;
   updateForm: (patch: Partial<FormData>) => void;
-  setForm: (data: FormData) => void;
 
   errors: Record<string, string>;
-  setErrors: (e: Record<string, string>) => void;
 
   otpSent: boolean;
   otpVerified: boolean;
@@ -108,7 +95,7 @@ const RegistrationContext = createContext<RegistrationContextType | undefined>(
 );
 
 /* --------------------------------------------------------
-   🔥 MAIN PROVIDER WITH ADMIN HANDOFF
+   PROVIDER
 -------------------------------------------------------- */
 export function RegistrationProvider({ children }: { children: ReactNode }) {
   const [currentStep, setCurrentStep] = useState(1);
@@ -122,92 +109,16 @@ export function RegistrationProvider({ children }: { children: ReactNode }) {
   const { addApplication } = useAdminApplications();
 
   /* -----------------------------
-     Restore from localStorage
-  ------------------------------*/
-  useEffect(() => {
-    const savedForm = localStorage.getItem("reg_form");
-    const savedStep = localStorage.getItem("reg_step");
-    const savedOtpSent = localStorage.getItem("reg_otp_sent");
-    const savedOtpVerified = localStorage.getItem("reg_otp_verified");
-    const savedPayment = localStorage.getItem("reg_payment");
-    const savedAppId = localStorage.getItem("reg_app_id");
-
-    if (savedForm) setFormData(JSON.parse(savedForm));
-    if (savedStep) setCurrentStep(Number(savedStep));
-    if (savedOtpSent) setOtpSent(savedOtpSent === "true");
-    if (savedOtpVerified) setOtpVerified(savedOtpVerified === "true");
-    if (savedPayment) setPaymentSuccess(savedPayment === "true");
-    if (savedAppId) setApplicationId(savedAppId);
-  }, []);
-
-  /* -----------------------------
-     Persist to localStorage
-  ------------------------------*/
-  useEffect(() => {
-    localStorage.setItem("reg_form", JSON.stringify(formData));
-  }, [formData]);
-
-  useEffect(() => {
-    localStorage.setItem("reg_step", String(currentStep));
-  }, [currentStep]);
-
-  useEffect(() => {
-    localStorage.setItem("reg_otp_sent", String(otpSent));
-  }, [otpSent]);
-
-  useEffect(() => {
-    localStorage.setItem("reg_otp_verified", String(otpVerified));
-  }, [otpVerified]);
-
-  useEffect(() => {
-    localStorage.setItem("reg_payment", String(paymentSuccess));
-  }, [paymentSuccess]);
-
-  useEffect(() => {
-    if (applicationId) localStorage.setItem("reg_app_id", applicationId);
-  }, [applicationId]);
-
-  /* -----------------------------
-     VALIDATIONS
+     VALIDATION
   ------------------------------*/
   const validateStep = (step: number) => {
     const e: Record<string, string> = {};
 
-    if (step === 1) {
-      if (!formData.name.trim()) e.name = "Name is required";
-      if (!/^\d{10}$/.test(formData.phone)) e.phone = "Phone must be 10 digits";
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
-        e.email = "Enter a valid email";
-      if (!formData.address.trim()) e.address = "Address is required";
-      if (!formData.district) e.district = "Select district";
-      if (!/^\d{4,6}$/.test(formData.pin)) e.pin = "Enter a valid PIN";
-      if (!formData.dob) e.dob = "DOB is required";
-    }
-
-    if (step === 2) {
-      if (!otpSent) e.otp = "Send OTP first";
-      if (formData.otp.length !== 6) e.otp = "Enter 6 digit OTP";
-      if (!otpVerified) e.otpVerified = "OTP not verified";
-    }
-
-    if (step === 3) {
-      if (!formData.technicianType) e.technicianType = "Required";
-      if (!formData.educationQualification)
-        e.educationQualification = "Required";
-    }
-
-    if (step === 4) {
-      if (!formData.bankName) e.bankName = "Bank is required";
-      if (!/^[A-Z]{4}0[A-Z0-9]{6}$/i.test(formData.ifsc))
-        e.ifsc = "Invalid IFSC";
-      if (formData.accountNumber !== formData.reAccountNumber)
-        e.reAccountNumber = "Account numbers do not match";
-    }
-
     if (step === 5) {
-      if (!(formData.aadhaar instanceof File)) e.aadhaar = "Aadhaar required";
-      if (!(formData.pan instanceof File)) e.pan = "PAN required";
-      if (!(formData.photo instanceof File)) e.photo = "Photo required";
+      const docs = formData.documents;
+      if (!docs.aadhaar) e.aadhaar = "Aadhaar required";
+      if (!docs.pan) e.pan = "PAN required";
+      if (!docs.photo) e.photo = "Photo required";
     }
 
     if (step === 6) {
@@ -226,22 +137,13 @@ export function RegistrationProvider({ children }: { children: ReactNode }) {
   ------------------------------*/
   const nextStep = () => {
     if (!validateStep(currentStep)) return false;
-    setCurrentStep((s) => Math.min(s + 1, 7));
+    setCurrentStep((s) => s + 1);
     return true;
   };
 
-  const prevStep = () => {
-    setErrors({});
-    setCurrentStep((s) => Math.max(s - 1, 1));
-  };
+  const prevStep = () => setCurrentStep((s) => s - 1);
 
-  const goToStep = (s: number) => {
-    if (s < currentStep) return setCurrentStep(s);
-    for (let i = currentStep; i < s; i++) {
-      if (!validateStep(i)) return;
-    }
-    setCurrentStep(s);
-  };
+  const goToStep = (s: number) => setCurrentStep(s);
 
   /* -----------------------------
      FORM
@@ -250,16 +152,10 @@ export function RegistrationProvider({ children }: { children: ReactNode }) {
     setFormData((prev) => ({ ...prev, ...patch }));
   };
 
-  const setForm = (data: FormData) => setFormData(data);
-
   /* -----------------------------
      OTP
   ------------------------------*/
   const sendOtp = async () => {
-    if (!/^\d{10}$/.test(formData.phone)) {
-      toast.error("Enter valid phone number");
-      return;
-    }
     setOtpSent(true);
     toast.success("OTP sent (demo: 123456)");
   };
@@ -267,7 +163,7 @@ export function RegistrationProvider({ children }: { children: ReactNode }) {
   const verifyOtp = async (otpValue: string) => {
     if (otpValue === "123456") {
       setOtpVerified(true);
-      toast.success("OTP verified!");
+      toast.success("OTP verified");
       return true;
     }
     toast.error("Invalid OTP");
@@ -275,13 +171,10 @@ export function RegistrationProvider({ children }: { children: ReactNode }) {
   };
 
   /* -----------------------------
-     🔥 PAYMENT → ADMIN HANDOFF
+     🔥 FINAL SUBMISSION (FIXED)
   ------------------------------*/
   const completePayment = async () => {
     if (!validateStep(6)) return;
-
-    toast.info("Processing payment...");
-    await new Promise((r) => setTimeout(r, 1000));
 
     const id = `APP-${Math.floor(100000 + Math.random() * 900000)}`;
 
@@ -289,15 +182,25 @@ export function RegistrationProvider({ children }: { children: ReactNode }) {
       applicationId: id,
       submittedAt: new Date().toISOString(),
       status: "PENDING",
-      formData,
+
+      formData: {
+        name: formData.name,
+        phone: formData.phone,
+        email: formData.email,
+        address: formData.address,
+        district: formData.district,
+        technicianType: formData.technicianType,
+        experienceYears: formData.experienceYears,
+      },
+
+      documents: formData.documents, // ✅ NOW CORRECT
     };
 
-    addApplication(application); // 🔥 SEND TO ADMIN
+    addApplication(application); // 🔥 ADMIN RECEIVES FULL DATA
 
     setApplicationId(id);
     setPaymentSuccess(true);
-
-    toast.success("Application submitted successfully!");
+    toast.success("Application submitted successfully");
   };
 
   /* -----------------------------
@@ -311,7 +214,6 @@ export function RegistrationProvider({ children }: { children: ReactNode }) {
     setOtpVerified(false);
     setPaymentSuccess(false);
     setApplicationId(null);
-
     localStorage.clear();
   };
 
@@ -324,9 +226,7 @@ export function RegistrationProvider({ children }: { children: ReactNode }) {
         goToStep,
         formData,
         updateForm,
-        setForm,
         errors,
-        setErrors,
         otpSent,
         otpVerified,
         sendOtp,

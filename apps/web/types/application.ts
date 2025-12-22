@@ -1,17 +1,23 @@
 export type ApplicationStatus = "PENDING" | "APPROVED" | "REJECTED";
 export type PartnerStatus = "ACTIVE" | "BLOCKED";
 
+/* =============================
+   DOCUMENTS (URL BASED)
+============================= */
 export interface ApplicationDocuments {
-  aadhaar?: File | null;
-  pan?: File | null;
-  photo?: File | null;
-  eduCert?: File | null;
-  drivingLicense?: File | null;
-  rcBook?: File | null;
-  policeVerification?: File | null;
-  cancelCheque?: File | null;
+  aadhaar?: string;
+  pan?: string;
+  photo?: string;
+  eduCert?: string;
+  drivingLicense?: string;
+  rcBook?: string;
+  policeVerification?: string;
+  cancelCheque?: string;
 }
 
+/* =============================
+   PARTNER APPLICATION
+============================= */
 export interface PartnerApplication {
   applicationId: string;
 
@@ -29,11 +35,10 @@ export interface PartnerApplication {
 
   status: ApplicationStatus;
   submittedAt: string;
+
   /* Admin controlled */
   partnerStatus?: PartnerStatus;
   zone?: string;
   zoneCode?: string;
   batch?: string;
-
-  createdAt?: string;
 }
