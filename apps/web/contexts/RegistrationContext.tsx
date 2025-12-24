@@ -191,12 +191,21 @@ export function RegistrationProvider({ children }: { children: ReactNode }) {
         district: formData.district,
         technicianType: formData.technicianType,
         experienceYears: formData.experienceYears,
+        // bankName: formData.bankName,
+        // ifsc: formData.ifsc,
+        // accountNumber: formData.accountNumber,
+        // cancelledCheque: formData.documents?.cancelledCheque,
+        // photo: formData.documents?.photo,
+        // aadhaar: formData.documents?.aadhaar,
+        // pan: formData.documents?.pan,
+        // digitalSignature: formData.digitalSignature,
+
       },
 
-      documents: formData.documents, // ✅ NOW CORRECT
+      documents: formData.documents, //  NOW CORRECT
     };
 
-    addApplication(application); // 🔥 ADMIN RECEIVES FULL DATA
+    addApplication(application); // ADMIN RECEIVES FULL DATA
 
     setApplicationId(id);
     setPaymentSuccess(true);

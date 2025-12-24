@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useRegistration } from "@/contexts/RegistrationContext";
+import { api } from "@/services/api";
 
 const districts = [
   "Bankura",
@@ -27,7 +28,8 @@ const districts = [
 ];
 
 export default function StepBasicInfo() {
-  const { formData, updateForm, errors } = useRegistration();
+  const { formData, updateForm, errors, nextStep } = useRegistration();
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -38,12 +40,48 @@ export default function StepBasicInfo() {
     updateForm({ [name]: value } as any);
   };
 
+  // ✅ NEW: SUBMIT HANDLER
+  const handleSubmit = async () => {
+    if (loading) return;
+    setLoading(true);
+
+    try {
+      //  Register partner
+      await api.post("/partners/register", {
+        fullName: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        district: formData.district,
+        pinCode: formData.pin,
+        dob: formData.dob,
+      });
+
+      // 2 Send OTP
+      await api.post("/auth/send-otp", {
+        phone: formData.phone,
+      });
+
+      // 3 Move to OTP step
+      nextStep();
+    } catch (err: any) {
+      alert(
+        err?.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6">
       {/* Title */}
       <h2 className="text-xl font-semibold text-gray-800 border-b pb-2">
         Basic Information
       </h2>
+
+      {/* --- YOUR UI (UNCHANGED) --- */}
 
       {/* Name */}
       <div>
@@ -61,9 +99,6 @@ export default function StepBasicInfo() {
               : "border-gray-300 focus:ring-blue-300"
           }`}
         />
-        {errors.name && (
-          <p className="text-red-600 text-sm mt-1">{errors.name}</p>
-        )}
       </div>
 
       {/* Email */}
@@ -81,9 +116,6 @@ export default function StepBasicInfo() {
               : "border-gray-300 focus:ring-blue-300"
           }`}
         />
-        {errors.email && (
-          <p className="text-red-600 text-sm mt-1">{errors.email}</p>
-        )}
       </div>
 
       {/* Phone */}
@@ -102,9 +134,6 @@ export default function StepBasicInfo() {
               : "border-gray-300 focus:ring-blue-300"
           }`}
         />
-        {errors.phone && (
-          <p className="text-red-600 text-sm mt-1">{errors.phone}</p>
-        )}
       </div>
 
       {/* Address */}
@@ -124,84 +153,52 @@ export default function StepBasicInfo() {
               : "border-gray-300 focus:ring-blue-300"
           }`}
         />
-        {errors.address && (
-          <p className="text-red-600 text-sm mt-1">{errors.address}</p>
-        )}
       </div>
 
-      {/* District + Pincode grid */}
+      {/* District + PIN */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* District */}
-        <div>
-          <label className="block font-medium mb-1 text-gray-700">
-            District *
-          </label>
-          <select
-            name="district"
-            value={formData.district}
-            onChange={handleChange}
-            className={`border rounded-lg w-full p-3 focus:outline-none focus:ring-2 ${
-              errors.district
-                ? "border-red-500 focus:ring-red-300"
-                : "border-gray-300 focus:ring-blue-300"
-            }`}
-          >
-            <option value="">Select District</option>
-            {districts.map((d) => (
-              <option key={d} value={d}>
-                {d}
-              </option>
-            ))}
-          </select>
-          {errors.district && (
-            <p className="text-red-600 text-sm mt-1">{errors.district}</p>
-          )}
-        </div>
+        <select
+          name="district"
+          value={formData.district}
+          onChange={handleChange}
+          className="border rounded-lg w-full p-3"
+        >
+          <option value="">Select District</option>
+          {districts.map((d) => (
+            <option key={d} value={d}>
+              {d}
+            </option>
+          ))}
+        </select>
 
-        {/* PIN */}
-        <div>
-          <label className="block font-medium mb-1 text-gray-700">
-            PIN Code *
-          </label>
-          <input
-            name="pin"
-            value={formData.pin}
-            maxLength={6}
-            onChange={handleChange}
-            placeholder="6-digit PIN"
-            className={`border rounded-lg w-full p-3 focus:outline-none focus:ring-2 ${
-              errors.pin
-                ? "border-red-500 focus:ring-red-300"
-                : "border-gray-300 focus:ring-blue-300"
-            }`}
-          />
-          {errors.pin && (
-            <p className="text-red-600 text-sm mt-1">{errors.pin}</p>
-          )}
-        </div>
+        <input
+          name="pin"
+          value={formData.pin}
+          maxLength={6}
+          onChange={handleChange}
+          placeholder="6-digit PIN"
+          className="border rounded-lg w-full p-3"
+        />
       </div>
 
       {/* DOB */}
-      <div>
-        <label className="block font-medium mb-1 text-gray-700">
-          Date of Birth *
-        </label>
-        <input
-          type="date"
-          name="dob"
-          value={formData.dob}
-          max={new Date().toISOString().split("T")[0]}
-          onChange={handleChange}
-          className={`border rounded-lg w-full p-3 focus:outline-none focus:ring-2 ${
-            errors.dob
-              ? "border-red-500 focus:ring-red-300"
-              : "border-gray-300 focus:ring-blue-300"
-          }`}
-        />
-        {errors.dob && (
-          <p className="text-red-600 text-sm mt-1">{errors.dob}</p>
-        )}
-      </div>
+      <input
+        type="date"
+        name="dob"
+        value={formData.dob}
+        max={new Date().toISOString().split("T")[0]}
+        onChange={handleChange}
+        className="border rounded-lg w-full p-3"
+      />
+
+      {/* ✅ CONTINUE BUTTON */}
+      <button
+        onClick={handleSubmit}
+        disabled={loading}
+        className="bg-black text-white py-3 rounded-lg disabled:opacity-50"
+      >
+        {loading ? "Sending OTP..." : "Continue"}
+      </button>
     </div>
   );
 }

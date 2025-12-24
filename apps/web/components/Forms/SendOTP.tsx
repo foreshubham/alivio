@@ -3,12 +3,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useRegistration } from "@/contexts/RegistrationContext";
 import { toast } from "sonner";
+import { api } from "@/services/api";
 
 export default function StepOTP() {
   const {
     formData,
     updateForm,
-    errors,
     otpSent,
     otpVerified,
     sendOtp,
@@ -17,51 +17,64 @@ export default function StepOTP() {
 
   const [localOtp, setLocalOtp] = useState(formData.otp || "");
   const [loading, setLoading] = useState(false);
-const otpInputRef = useRef<HTMLInputElement | null>(null);
+  const otpInputRef = useRef<HTMLInputElement | null>(null);
 
-
-  // Auto-focus OTP input when OTP is sent
+  /* -----------------------------
+     Auto focus OTP input
+  ------------------------------*/
   useEffect(() => {
     if (otpSent && otpInputRef.current) {
       otpInputRef.current.focus();
     }
   }, [otpSent]);
 
+  /* -----------------------------
+     Send OTP
+  ------------------------------*/
   const handleSend = async () => {
     setLoading(true);
-    const toastId = toast.loading("Sending OTP...");
     try {
       await sendOtp();
-      toast.success("OTP sent successfully", { id: toastId });
     } catch {
-      toast.error("Failed to send OTP", { id: toastId });
+      toast.error("Failed to send OTP");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleVerify = async () => {
-    if (localOtp.length !== 6) {
-      toast.warning("Please enter a 6-digit OTP");
-      return;
-    }
+// Verify OTP
 
-    setLoading(true);
-    const toastId = toast.loading("Verifying OTP...");
-    try {
-      const ok = await verifyOtp(localOtp);
-      if (ok) {
-        updateForm({ otp: localOtp });
-        toast.success("OTP verified successfully", { id: toastId });
-      } else {
-        toast.error("Invalid OTP", { id: toastId });
-      }
-    } catch {
-      toast.error("OTP verification failed", { id: toastId });
-    } finally {
-      setLoading(false);
+const handleVerify = async () =>{
+  if (localOtp.length !== 6) {
+    toast.error("Please enter a valid 6-digit OTP");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    // Make the API call to verify the OTP
+    const response = await api.post("/auth/verify-otp", {
+      phone: formData.phone,
+      otp: localOtp,
+    });
+
+    if (response.data.success) {
+      // OTP verified successfully
+      toast.success("OTP veified successfully");
+      updateForm({ otp: localOtp });
+      localStorage.setItem("token", response.data.token);
+    } else {
+      // OTP verification failed
+      toast.error("Invalid OTP. Please try again.");
     }
-  };
+  } catch (error) {
+    toast.error("Error verifying OTP. Please try again.");
+
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="flex flex-col gap-6">
@@ -76,7 +89,7 @@ const otpInputRef = useRef<HTMLInputElement | null>(null);
         <strong className="text-gray-900">{formData.phone}</strong>
       </p>
 
-      {/* Send OTP Button */}
+      {/* Send OTP */}
       {!otpSent ? (
         <button
           onClick={handleSend}
@@ -102,25 +115,11 @@ const otpInputRef = useRef<HTMLInputElement | null>(null);
                 setLocalOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
               }
               placeholder="123456"
-              className={`border rounded-lg w-full p-3 text-lg tracking-widest text-center focus:outline-none focus:ring-2 ${
-                errors.otp || errors.otpVerified
-                  ? "border-red-500 focus:ring-red-300"
-                  : "border-gray-300 focus:ring-blue-300"
-              }`}
+              className="border rounded-lg w-full p-3 text-lg tracking-widest text-center focus:outline-none focus:ring-2 border-gray-300 focus:ring-blue-300"
             />
-
-            {/* Error Messages */}
-            {errors.otp && (
-              <p className="text-red-600 text-sm mt-1">{errors.otp}</p>
-            )}
-            {errors.otpVerified && (
-              <p className="text-red-600 text-sm mt-1">
-                {errors.otpVerified}
-              </p>
-            )}
           </div>
 
-          {/* Verify Button or Success */}
+          {/* Verify */}
           {!otpVerified ? (
             <button
               onClick={handleVerify}

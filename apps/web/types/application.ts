@@ -12,7 +12,7 @@ export interface ApplicationDocuments {
   drivingLicense?: string;
   rcBook?: string;
   policeVerification?: string;
-  cancelCheque?: string;
+  cancelledCheque?: string;
 }
 
 /* =============================
