@@ -1,15 +1,7 @@
 "use client";
 
 import { createContext, useContext, ReactNode, useState } from "react";
-
-export type Toolkit = {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-  paid?: boolean;
-  deliveryDate?: string;
-};
+import { Toolkit } from "@/types/toobkit"; 
 
 type CartContextType = {
   cart: Toolkit[];
@@ -42,6 +34,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
 export const useCart = () => {
   const context = useContext(CartContext);
-  if (!context) throw new Error("useCart must be used inside CartProvider");
+  if (!context) {
+    throw new Error("useCart must be used inside CartProvider");
+  }
   return context;
 };

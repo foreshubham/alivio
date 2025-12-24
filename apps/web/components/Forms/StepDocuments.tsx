@@ -1,93 +1,116 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useRegistration } from "@/contexts/RegistrationContext";
-import { toast } from "sonner";
+import { api } from "@/services/api";
 
-const documentFields: { name: keyof FormData; label: string }[] = [
-  { name: "aadhaar", label: "Aadhaar *" },
-  { name: "pan", label: "PAN *" },
-  { name: "eduCert", label: "Educational Certificate *" },
-  { name: "drivingLicense", label: "Driving License *" },
-  { name: "rcBook", label: "RC Book *" },
-  { name: "policeVerification", label: "Police Verification *" },
-  { name: "photo", label: "Photo *" },
-  { name: "cancelCheque", label: "Cancel Cheque *" },
-];
+const documentFields = [
+  { name: "aadhaar", label: "Aadhaar Card" },
+  { name: "pan", label: "PAN Card" },
+  { name: "eduCert", label: "Educational Certificate" },
+  { name: "drivingLicense", label: "Driving License" },
+  { name: "rcBook", label: "RC Book" },
+  { name: "policeVerification", label: "Police Verification" },
+  { name: "photo", label: "Passport Size Photo" },
+  { name: "cancelledCheque", label: "Cancelled Cheque" },
+] as const;
+
+type DocumentKey = typeof documentFields[number]["name"];
 
 export default function StepDocuments() {
-  const { formData, updateForm, errors } = useRegistration();
+  const { formData, updateForm } = useRegistration();
+  const [loading, setLoading] = useState(false);
 
-  const handleFileChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    field: keyof FormData
-  ) => {
-    const file = e.target.files?.[0];
+  /* =========================
+     FILE CHANGE
+  ========================= */
+  const handleFileChange = (name: DocumentKey, file: File | null) => {
+    if (!file) return;
 
-    if (!file) {
-      toast.warning("No file selected");
+    updateForm({
+      documents: {
+        ...formData.documents,
+        [name]: file, // ✅ STORE FILE (NOT URL)
+      },
+    });
+  };
+
+  /* =========================
+     SUBMIT
+  ========================= */
+  const handleSubmit = async () => {
+    if (
+      !formData.documents ||
+      documentFields.some((field) => !formData.documents?.[field.name])
+    ) {
+      alert("Please upload all required documents");
       return;
     }
 
-    updateForm({ [field]: file } as any);
-    toast.success(`${file.name} uploaded`);
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Authentication required. Please verify OTP again.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const payload = new FormData();
+
+      documentFields.forEach((field) => {
+        const file = formData.documents?.[field.name];
+        if (file) {
+          payload.append(field.name, file);
+        }
+      });
+
+      await api.post("/partners/documents", payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      alert("Documents uploaded successfully");
+    } catch (err: any) {
+      alert(err?.response?.data?.message || "Failed to upload documents");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleRemove = (field: keyof FormData) => {
-    updateForm({ [field]: null } as any);
-    toast.info("File removed");
-  };
-
+  /* =========================
+     UI
+  ========================= */
   return (
-    <div className="flex flex-col gap-6">
-      <h2 className="text-xl font-semibold text-gray-800 border-b pb-2">
-        Upload Required Documents
-      </h2>
+    <div className="space-y-6">
+      {documentFields.map((field) => (
+        <div key={field.name} className="space-y-2">
+          <label className="text-sm font-medium text-gray-700">
+            {field.label}
+          </label>
 
-      {documentFields.map((doc) => {
-        const file = formData[doc.name];
-        const isFile = file instanceof File;
+          <input
+            type="file"
+            onChange={(e) =>
+              handleFileChange(field.name, e.target.files?.[0] ?? null)
+            }
+          />
 
-        return (
-          <div key={doc.name} className="flex flex-col">
-            <label className="block font-medium mb-1 text-gray-700">
-              {doc.label}
-            </label>
+          {formData.documents?.[field.name] && (
+            <p className="text-xs text-green-600">✔ File selected</p>
+          )}
+        </div>
+      ))}
 
-            <input
-              type="file"
-              accept="image/*,application/pdf"
-              onChange={(e) => handleFileChange(e, doc.name)}
-              className={`border rounded-lg p-3 bg-white cursor-pointer focus:outline-none focus:ring-2 ${
-                errors[doc.name]
-                  ? "border-red-500 focus:ring-red-300"
-                  : "border-gray-300 focus:ring-blue-300"
-              }`}
-            />
-
-            {isFile && (
-              <div className="flex items-center justify-between mt-2 bg-gray-100 p-2 rounded-lg shadow-sm">
-                <span className="truncate text-sm text-gray-700">
-                  {(file as File).name}
-                </span>
-
-                <button
-                  type="button"
-                  onClick={() => handleRemove(doc.name)}
-                  className="text-red-600 font-bold text-lg px-2"
-                  aria-label={`Remove ${doc.label}`}
-                >
-                  ×
-                </button>
-              </div>
-            )}
-
-            {errors[doc.name] && (
-              <p className="text-red-600 text-sm mt-1">{errors[doc.name]}</p>
-            )}
-          </div>
-        );
-      })}
+      <button
+        onClick={handleSubmit}
+        disabled={loading}
+        className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+      >
+        {loading ? "Uploading..." : "Submit Documents"}
+      </button>
     </div>
   );
 }

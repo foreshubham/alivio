@@ -9,9 +9,26 @@ export default function StepPayment() {
   const [loading, setLoading] = useState(false);
 
   const handlePayment = async () => {
-    setLoading(true);
     try {
-      await completePayment(); // already handles success/failure toasts
+      setLoading(true);
+
+      /**
+       * 🚧 PAYMENT GATEWAY TEMPORARILY DISABLED
+       * ---------------------------------------
+       * This is a bypass for development / MVP testing.
+       * Payment integration will be added later.
+       */
+
+      // await api.post("/partners/payment/create", { amount: 200 });
+      // Cashfree / Razorpay checkout here
+
+      // ✅ Simulate small delay (optional)
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      toast.success("Payment completed (gateway bypassed)");
+
+      // ✅ Continue onboarding flow
+      await completePayment();
     } catch (err) {
       toast.error("An error occurred during payment.");
       console.error(err);
@@ -21,46 +38,60 @@ export default function StepPayment() {
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="max-w-2xl mx-auto space-y-6">
+      {/* Header */}
+      <div className="text-center">
+        <h2 className="text-2xl font-semibold text-gray-900">
+          Application Payment
+        </h2>
+        <p className="text-sm text-gray-500 mt-1">
+          Complete your registration by paying the one-time fee
+        </p>
+      </div>
 
-      {/* Title */}
-      <h2 className="text-xl font-semibold text-gray-800 border-b pb-2">
-        Application Payment
-      </h2>
-
-      {/* Payment Info Box */}
-      <div className="bg-gray-50 p-5 rounded-lg border shadow-sm">
-        <p className="text-gray-700 leading-relaxed">
-          To complete your application, please make a one-time registration payment.
-          This fee is <span className="font-semibold text-red-600">non-refundable</span>.
+      {/* Payment Card */}
+      <div className="bg-white border border-gray-200/70 rounded-2xl p-6 shadow-sm space-y-4">
+        <p className="text-sm text-gray-700 leading-relaxed">
+          To finalize your application, a one-time registration fee is required.
+          This payment helps us verify and process your onboarding.
         </p>
 
-        <div className="mt-4 flex items-center justify-between bg-white border rounded-lg p-4 shadow-sm">
+        <div className="flex items-center justify-between rounded-xl border border-gray-200/60 bg-gray-50 px-5 py-4">
           <div>
-            <p className="text-gray-800 font-semibold text-lg">Registration Fee</p>
-            <p className="text-sm text-gray-500">One-time payment</p>
+            <p className="text-sm font-medium text-gray-800">
+              Registration Fee
+            </p>
+            <p className="text-xs text-gray-500">
+              One-time • Non-refundable
+            </p>
           </div>
 
-          <p className="text-2xl font-bold text-blue-600">₹200</p>
+          <p className="text-2xl font-semibold text-gray-900">₹200</p>
+        </div>
+
+        <div className="text-xs text-gray-500 space-y-1">
+          <p>• Payment gateway temporarily disabled</p>
+          <p>• This is a development/testing flow</p>
+          <p>• No real payment is processed</p>
         </div>
       </div>
 
-      {/* Payment Button */}
+      {/* CTA */}
       <button
         onClick={handlePayment}
         disabled={loading}
-        className={`w-full py-3 rounded-lg text-white text-center font-medium transition-all ${
+        className={`w-full py-3.5 rounded-xl font-medium transition-all ${
           loading
-            ? "bg-gray-400 cursor-not-allowed"
-            : "bg-blue-600 hover:bg-blue-700 shadow-md"
+            ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+            : "bg-green-600 hover:bg-green-700 text-white shadow-sm"
         }`}
       >
-        {loading ? "Processing Payment..." : "Pay ₹200"}
+        {loading ? "Processing..." : "Continue (Payment Bypassed)"}
       </button>
 
-      {/* Small footer note */}
-      <p className="text-xs text-gray-500 text-center">
-        By completing the payment, you agree to our processing terms.
+      {/* Footer */}
+      <p className="text-xs text-gray-400 text-center">
+        This is a temporary flow. Payment will be enabled later.
       </p>
     </div>
   );
