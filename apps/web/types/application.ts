@@ -1,4 +1,4 @@
-export type ApplicationStatus = "PENDING" | "APPROVED" | "REJECTED";
+export type ApplicationStatus = "PENDING" | "APPROVED" | "REJECTED" | "BLOCKED";
 export type PartnerStatus = "ACTIVE" | "BLOCKED";
 
 /* =============================

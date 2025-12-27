@@ -10,6 +10,7 @@ import {
   FiLogOut,
   FiClipboard,
 } from "react-icons/fi";
+import { GiSpellBook } from "react-icons/gi";
 
 const Sidebar = () => {
   const router = useRouter();
@@ -18,6 +19,7 @@ const Sidebar = () => {
   const menuItems = [
     { label: "Dashboard", icon: <FiHome size={20} />, path: "/dashboard" },
     { label: "Orders", icon: <FiClipboard size={20} />, path: "/orders" },
+    { label: "Training", icon: <GiSpellBook  size={20} />, path: "/dashboard/training" },
     { label: "Downloads", icon: <FiDownload size={20} />, path: "/downloads" },
     { label: "Addresses", icon: <FiMapPin size={20} />, path: "/addresses" },
     { label: "Account details", icon: <FiUser size={20} />, path: "/account" },
