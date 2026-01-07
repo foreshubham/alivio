@@ -1,40 +1,48 @@
 "use client";
 
-import React from "react";
-import { useOnboarding } from "@/contexts/onboardingContext";
+import { useEffect, useState } from "react";
+import { api } from "@/services/api";
+import { CheckCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function ProIdPage() {
-  const { generateProId, proId, allToolkitsPaid } = useOnboarding();
+  const [proId, setProId] = useState<string | null>(null);
+  const router = useRouter();
 
-  if (!allToolkitsPaid) {
-    return <p className="text-center py-10">Please complete toolkit purchase first.</p>;
-  }
+  useEffect(() => {
+    const fetchProId = async () => {
+      const res = await api.get("/partners/me");
+      setProId(res.data.data.proId);
+    };
+
+    fetchProId();
+  }, []);
 
   return (
-    <div className="max-w-lg mx-auto py-10 text-center">
-      <h1 className="text-xl font-semibold mb-4">Generate PRO ID</h1>
+    <div className="max-w-xl mx-auto py-20 text-center">
+      <CheckCircle size={48} className="mx-auto text-green-600 mb-6" />
 
-      {!proId ? (
-        <button
-          className="px-6 py-2 bg-blue-600 text-white rounded"
-          onClick={generateProId}
-        >
-          Generate PRO ID
-        </button>
-      ) : (
-        <>
-          <p className="text-green-600 text-lg font-semibold">
-            ✔ Your PRO ID: {proId}
-          </p>
+      <h1 className="text-2xl font-semibold text-gray-800">
+        You’re All Set!
+      </h1>
 
-          <a
-            href="/partners/dashboard"
-            className="mt-6 inline-block px-6 py-2 bg-green-600 text-white rounded"
-          >
-            Go to Dashboard →
-          </a>
-        </>
-      )}
+      <p className="text-gray-600 mt-3">
+        Your PRO ID has been generated successfully.
+      </p>
+
+      <div className="mt-6 bg-gray-100 rounded-lg p-4">
+        <p className="text-sm text-gray-500">Your PRO ID</p>
+        <p className="text-xl font-bold text-gray-800 mt-1">
+          {proId || "—"}
+        </p>
+      </div>
+
+      <button
+        onClick={() => router.push("/dashboard")}
+        className="mt-10 px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
+      >
+        Go to Dashboard →
+      </button>
     </div>
   );
 }

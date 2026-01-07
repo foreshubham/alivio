@@ -34,17 +34,16 @@ function Section({
 
 function Hero() {
   return (
-  <Section className="relative overflow-hidden bg-linear-to-b from-white via-slate-50 to-white">
-  
-  {/* Background image layer */}
-  <div
-    className="absolute inset-0 bg-center bg-no-repeat bg-contain opacity-20 pointer-events-none"
-    style={{ backgroundImage: "url('/bgImage1.png')" }}
-  />
+    <Section className="relative overflow-hidden bg-linear-to-b from-white via-slate-50 to-white">
+      {/* Background image layer */}
+      <div
+        className="absolute inset-0 bg-center bg-no-repeat bg-contain opacity-20 pointer-events-none"
+        style={{ backgroundImage: "url('/bgImage1.png')" }}
+      />
 
-  {/* Content */}
-  <Container > 
-       <div className="grid items-center gap-16 lg:grid-cols-2">
+      {/* Content */}
+      <Container>
+        <div className="grid items-center gap-16 lg:grid-cols-2">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
@@ -84,6 +83,8 @@ function Hero() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6 }}
             className="relative"
+
+            // style={{backgroundImage: "url('/h1.png')"}}
           >
             <div className="rounded-3xl border border-slate-200 bg-white p-10 shadow-sm">
               <div className="space-y-4">
@@ -95,19 +96,18 @@ function Hero() {
             </div>
           </motion.div>
         </div>
-
       </Container>
-<InfiniteImageScroller
-  container="7xl"
-  speed={45}
-  images={[
-    { src: "/hotel/lalit.png" },
-    { src: "/hotel/leela.png" },
-    { src: "/hotel/obr.png" },
-    { src: "/hotel/itc.webp" },
-    { src: "/hotel/orchid.webp" },
-  ]}
-/>
+      <InfiniteImageScroller
+        container="7xl"
+        speed={45}
+        images={[
+          { src: "/hotel/lalit.png" },
+          { src: "/hotel/leela.png" },
+          { src: "/hotel/obr.png" },
+          { src: "/hotel/itc.webp" },
+          { src: "/hotel/orchid.webp" },
+        ]}
+      />
     </Section>
   );
 }
@@ -137,9 +137,15 @@ const segments = [
 
 function Audience() {
   return (
-    <Section className="bg-white py-24"
-    style={{backgroundImage: "url('/dots.png')", backgroundSize:"" ,
-     backgroundRepeat: "no-repeat", backgroundPosition: "left" }}>
+    <Section
+      className="bg-white py-24"
+      style={{
+        backgroundImage: "url('/dots.png')",
+        backgroundSize: "",
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "left",
+      }}
+    >
       <Container>
         {/* HEADER */}
         <div className="mx-auto max-w-3xl text-center">
@@ -185,9 +191,6 @@ function Audience() {
     </Section>
   );
 }
-
-
-
 
 /* =====================================================
    VALUE PROPOSITION (OUTCOME-FOCUSED)
