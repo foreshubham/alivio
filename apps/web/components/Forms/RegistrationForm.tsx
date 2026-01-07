@@ -42,10 +42,21 @@ function FormContent() {
         <div className="flex-1 p-6">
           {currentStep === 1 && <StepBasicInfo />}
           {currentStep === 2 && <StepOTP />}
-          {currentStep === 3 && <StepRoleInfo />}
-          {currentStep === 4 && <StepBankDetails />}
+
+          {currentStep === 3 && (
+            <StepRoleInfo onNext={nextStep} />
+          )}
+
+          {currentStep === 4 && (
+            <StepBankDetails onNext={nextStep} />
+          )}
+
           {currentStep === 5 && <StepDocuments />}
-          {currentStep === 6 && <StepTerms />}
+
+          {currentStep === 6 && (
+            <StepTerms onNext={nextStep} />
+          )}
+
           {currentStep === 7 && <StepPayment />}
 
           <div className="flex justify-between mt-6">
