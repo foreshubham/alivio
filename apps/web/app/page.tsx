@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import InfiniteImageScroller from "@/components/UI/InfiniteImageScroller";
+import PartnerWhySection from "@/components/UI/PartnerWhySection";
 
 /* =====================================================
    DESIGN SYSTEM PRIMITIVES 
@@ -33,7 +34,14 @@ function Section({
 
 function Hero() {
   return (
-    <Section className="bg-linear-to-b from-white via-slate-50 to-white">
+    <Section className="relative overflow-hidden bg-linear-to-b from-white via-slate-50 to-white">
+      {/* Background image layer */}
+      <div
+        className="absolute inset-0 bg-center bg-no-repeat bg-contain opacity-20 pointer-events-none"
+        style={{ backgroundImage: "url('/bgImage1.png')" }}
+      />
+
+      {/* Content */}
       <Container>
         <div className="grid items-center gap-16 lg:grid-cols-2">
           <motion.div
@@ -75,6 +83,8 @@ function Hero() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6 }}
             className="relative"
+
+            // style={{backgroundImage: "url('/h1.png')"}}
           >
             <div className="rounded-3xl border border-slate-200 bg-white p-10 shadow-sm">
               <div className="space-y-4">
@@ -86,18 +96,18 @@ function Hero() {
             </div>
           </motion.div>
         </div>
-
-        <InfiniteImageScroller
-          container="7xl"
-          speed={45}
-          images={[
-            { src: "/logo.jpg" },
-            { src: "/logo.jpg" },
-            { src: "/logo.jpg" },
-            { src: "/logo.jpg" },
-          ]}
-        />
       </Container>
+      <InfiniteImageScroller
+        container="7xl"
+        speed={45}
+        images={[
+          { src: "/hotel/lalit.png" },
+          { src: "/hotel/leela.png" },
+          { src: "/hotel/obr.png" },
+          { src: "/hotel/itc.webp" },
+          { src: "/hotel/orchid.webp" },
+        ]}
+      />
     </Section>
   );
 }
@@ -127,23 +137,46 @@ const segments = [
 
 function Audience() {
   return (
-    <Section>
+    <Section
+      className="bg-white py-24"
+      style={{
+        backgroundImage: "url('/dots.png')",
+        backgroundSize: "",
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "left",
+      }}
+    >
       <Container>
+        {/* HEADER */}
         <div className="mx-auto max-w-3xl text-center">
-          <h2 className="text-3xl font-semibold text-slate-900">
+          {/* Eyebrow / Overline */}
+          <span className="text-xs font-semibold tracking-widest uppercase text-slate-500">
+            Who this is for
+          </span>
+
+          <h2 className="mt-3 text-3xl md:text-4xl font-semibold tracking-tight text-slate-900">
             Designed for partners who value stability
           </h2>
-          <p className="mt-4 text-slate-600">
-            Alivio works best with teams looking for long-term collaboration,
-            not quick experiments.
+
+          <p className="mt-4 text-base leading-relaxed text-slate-600">
+            Alivio works best with teams focused on long-term collaboration,
+            operational discipline, and sustainable growth — not short-term
+            experiments.
           </p>
         </div>
 
-        <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        {/* SEGMENTS */}
+        <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {segments.map((s) => (
             <div
               key={s.title}
-              className="rounded-2xl border border-slate-200 bg-white p-6"
+              className="
+                group rounded-2xl border border-slate-200 bg-white p-6
+                transition-all duration-300
+                hover:-translate-y-1
+                hover:border-slate-300
+                hover:shadow-md
+              "
             >
               <h3 className="text-sm font-semibold text-slate-900">
                 {s.title}
@@ -320,6 +353,8 @@ export default function PartnerHomePage() {
   return (
     <main className="text-slate-900">
       <Hero />
+
+      <PartnerWhySection />
       <Audience />
       <Value />
       <Process />

@@ -25,7 +25,7 @@ export default function InfiniteImageScroller({
     <div
       className={`overflow-hidden ${
         container === "7xl"
-          ? "mx-auto max-w-7xl px-5 sm:px-8 lg:px-12"
+          ? "mx-auto max-w-7xl px-5 pt-20 sm:px-8 lg:px-12"
           : "w-full"
       }`}
     >
@@ -43,7 +43,7 @@ export default function InfiniteImageScroller({
       >
         {repeatedImages.map((img, idx) => (
           <div key={idx} className="mx-6 flex shrink-0 items-center">
-            <div className="relative h-20 w-40 grayscale opacity-80 transition hover:grayscale-0 hover:opacity-100">
+            <div className="relative h-20 w-40 transition ">
               <Image src={img.src} alt={img.alt ?? "Scrolling image"} fill className="object-contain" />
             </div>
           </div>

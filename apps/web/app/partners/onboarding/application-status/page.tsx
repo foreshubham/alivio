@@ -1,135 +1,289 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useAdminApplications } from "@/contexts/adminContext";
+import { api } from "@/services/api";
+import { CheckCircle, Clock, XCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
 
-type Status = "PENDING" | "APPROVED" | "REJECTED";
+/* ============================
+   TYPES
+============================ */
+type Status =
+  | "DRAFT"
+  | "ROLE_SUBMITTED"
+  | "BANK_SUBMITTED"
+  | "DOCS_SUBMITTED"
+  | "PAYMENT_PENDING"
+  | "SUBMITTED"
+  | "TRAINING_REQUIRED"
+  | "ACTIVE"
+  | "REJECTED"
+  | "BLOCKED";
+
+interface PartnerData {
+  applicationId?: string;
+  status: Status;
+  training?: {
+    required?: boolean;
+    paid?: boolean;
+    amount?: number;
+    completed?: boolean;
+  };
+  rejectionReason?: string;
+}
 
 export default function ApprovalPage() {
-  const { getApplicationById } = useAdminApplications();
-  const [status, setStatus] = useState<Status | null>(null);
-  const [applicationId, setApplicationId] = useState<string | null>(null);
+  const router = useRouter();
+  const [data, setData] = useState<PartnerData | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  /* ---------------------------------
-     Load Application ID
-  ----------------------------------*/
   useEffect(() => {
-    const id = localStorage.getItem("reg_app_id");
-    setApplicationId(id);
-  }, []);
+    const token =
+      localStorage.getItem("partner_token") ||
+      localStorage.getItem("token");
 
-  /* ---------------------------------
-     Fetch Application Status
-  ----------------------------------*/
-  useEffect(() => {
-    if (!applicationId) return;
+    if (!token) {
+      router.replace("/partners/login");
+      return;
+    }
 
-    const app = getApplicationById(applicationId);
-    if (app) setStatus(app.status);
-  }, [applicationId, getApplicationById]);
+    const fetchMe = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get("/partners/me");
+        setData(res.data?.data || null);
+      } catch {
+        setData(null);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  /* ---------------------------------
-     UI STATES
-  ----------------------------------*/
-  if (!applicationId) {
+    fetchMe();
+  }, [router]);
+
+  if (loading) {
     return (
       <Center>
-        <p className="text-sm text-gray-500">
-          Application ID not found.
+        <p className="text-sm text-gray-500 animate-pulse">
+          Loading application status…
         </p>
       </Center>
     );
   }
 
-  if (!status) {
+  if (!data) {
     return (
       <Center>
         <p className="text-sm text-gray-500">
-          Fetching application status…
+          Unable to load application status.
         </p>
       </Center>
     );
   }
+
+  const { status, training, rejectionReason, applicationId } = data;
 
   return (
-    <div className="max-w-lg mx-auto py-12 text-center">
-      <p className="text-xs uppercase tracking-wide text-gray-500 mb-2">
-        Application Status
-      </p>
+    <div className="min-h-screen bg-gray-50 px-4 py-10 flex items-center justify-center">
+      <div className="w-full max-w-2xl bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8">
+        <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 text-center mb-1">
+          Application Status
+        </p>
 
-      <h1 className="text-lg font-medium text-gray-800 mb-6">
-        {applicationId}
-      </h1>
+        {applicationId && (
+          <p className="text-sm text-gray-600 text-center mb-6">
+            Application ID:{" "}
+            <span className="font-medium text-gray-800">
+              {applicationId}
+            </span>
+          </p>
+        )}
 
-      {status === "PENDING" && (
-        <StatusCard
-          color="yellow"
-          title="Under Review"
-          message="Your application is currently being reviewed by our team. Please allow 24–48 hours."
-        />
-      )}
-
-      {status === "APPROVED" && (
-        <>
+        {/* UNDER REVIEW */}
+        {[
+          "SUBMITTED",
+          "ROLE_SUBMITTED",
+          "BANK_SUBMITTED",
+          "DOCS_SUBMITTED",
+        ].includes(status) && (
           <StatusCard
-            color="green"
-            title="Approved"
-            message="Your application has been approved. You may proceed with onboarding."
+            icon={<Clock />}
+            color="yellow"
+            title="Under Review"
+            message="Your application is under review. This typically takes 24–48 hours."
           />
+        )}
 
-          <a
-            href="/partners/onboarding/buy-toolkit"
-            className="mt-6 inline-block px-6 py-2 bg-green-600 text-white rounded-md text-sm"
-          >
-            Continue
-          </a>
-        </>
-      )}
+        {/* PAYMENT PENDING */}
+        {status === "PAYMENT_PENDING" && (
+          <>
+            <StatusCard
+              icon={<Clock />}
+              color="purple"
+              title="Payment Pending"
+              message="Please complete your onboarding payment to continue."
+            />
+            <ActionButton href="/partners/payment">
+              Complete Payment
+            </ActionButton>
+          </>
+        )}
 
-      {status === "REJECTED" && (
-        <StatusCard
-          color="red"
-          title="Rejected"
-          message="Unfortunately, your application was rejected. Please contact support for more details."
-        />
-      )}
+        {/* TRAINING REQUIRED */}
+        {status === "TRAINING_REQUIRED" && (
+          <>
+            <StatusCard
+              icon={<Clock />}
+              color="blue"
+              title="Training Required"
+              message={`Mandatory training fee: ₹${training?.amount?.toLocaleString()}`}
+            />
+
+            {/* TRAINING DETAILS */}
+            <div className="mt-6 bg-gray-50 border border-gray-200 rounded-xl p-5 sm:p-6">
+              <p className="text-sm font-semibold text-gray-900 mb-2">
+                Partner Onboarding Training
+              </p>
+
+              <p className="text-sm text-gray-600 leading-relaxed mb-4">
+                To maintain service quality and compliance, all partners must
+                complete a one-time onboarding training before account activation.
+              </p>
+
+              <ul className="space-y-2 text-sm text-gray-600">
+                <li>• Platform navigation & order workflow</li>
+                <li>• Customer experience & service standards</li>
+                <li>• Safety, compliance & operational policies</li>
+                <li>• Payments, settlements & support process</li>
+              </ul>
+
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm text-gray-600">
+                <p>
+                  <span className="font-medium text-gray-800">Duration:</span>{" "}
+                  60–90 mins
+                </p>
+                <p>
+                  <span className="font-medium text-gray-800">Mode:</span>{" "}
+                  Online
+                </p>
+                <p>
+                  <span className="font-medium text-gray-800">Access:</span>{" "}
+                  Self-paced
+                </p>
+              </div>
+            </div>
+
+            {!training?.paid && (
+              <ActionButton href="/partners/training/payment">
+                Pay Training Fee
+              </ActionButton>
+            )}
+
+            {training?.paid && !training?.completed && (
+              <p className="mt-6 text-sm text-gray-600 text-center">
+                Payment received. Please complete the training modules to activate
+                your account.
+              </p>
+            )}
+          </>
+        )}
+
+        {/* ACTIVE */}
+        {status === "ACTIVE" && (
+          <>
+            <StatusCard
+              icon={<CheckCircle />}
+              color="green"
+              title="Approved"
+              message="Your application has been approved. Welcome to Alivio."
+            />
+            <ActionButton href="/dashboard">
+              Go to Dashboard
+            </ActionButton>
+          </>
+        )}
+
+        {/* REJECTED */}
+        {status === "REJECTED" && (
+          <StatusCard
+            icon={<XCircle />}
+            color="red"
+            title="Rejected"
+            message={
+              rejectionReason ||
+              "Your application was rejected. Please contact support."
+            }
+          />
+        )}
+
+        {/* BLOCKED */}
+        {status === "BLOCKED" && (
+          <StatusCard
+            icon={<XCircle />}
+            color="red"
+            title="Account Blocked"
+            message="Your account has been blocked due to policy violations."
+          />
+        )}
+      </div>
     </div>
   );
 }
 
-/* =============================
-   Reusable Components
-============================= */
+/* ============================
+   UI COMPONENTS
+============================ */
 
 const Center = ({ children }: { children: React.ReactNode }) => (
-  <div className="h-[60vh] flex items-center justify-center">
+  <div className="min-h-screen flex items-center justify-center bg-gray-50">
     {children}
   </div>
 );
 
+const ActionButton = ({
+  href,
+  children,
+}: {
+  href: string;
+  children: React.ReactNode;
+}) => (
+  <a
+    href={href}
+    className="mt-8 w-full sm:w-auto inline-flex justify-center px-7 py-3 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition shadow"
+  >
+    {children}
+  </a>
+);
+
 const StatusCard = ({
+  icon,
   color,
   title,
   message,
 }: {
-  color: "green" | "yellow" | "red";
+  icon: React.ReactNode;
+  color: "green" | "yellow" | "red" | "blue" | "purple";
   title: string;
   message: string;
 }) => {
   const colorMap = {
-    green: "bg-green-50 text-green-700 border-green-200",
-    yellow: "bg-yellow-50 text-yellow-700 border-yellow-200",
-    red: "bg-red-50 text-red-700 border-red-200",
+    green: "bg-green-50 border-green-200 text-green-700",
+    yellow: "bg-yellow-50 border-yellow-200 text-yellow-700",
+    red: "bg-red-50 border-red-200 text-red-700",
+    blue: "bg-blue-50 border-blue-200 text-blue-700",
+    purple: "bg-purple-50 border-purple-200 text-purple-700",
   };
 
   return (
-    <div
-      className={`border rounded-lg p-6 ${colorMap[color]}`}
-    >
-      <p className="text-lg font-semibold mb-2">
-        {title}
-      </p>
-      <p className="text-sm">{message}</p>
+    <div className={`border rounded-xl p-6 ${colorMap[color]}`}>
+      <div className="flex justify-center mb-4">
+        <div className="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-sm">
+          {icon}
+        </div>
+      </div>
+      <p className="text-lg font-semibold mb-2 text-center">{title}</p>
+      <p className="text-sm text-center leading-relaxed">{message}</p>
     </div>
   );
 };

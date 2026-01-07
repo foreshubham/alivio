@@ -1,34 +1,43 @@
 "use client";
 
 import React from "react";
-import Sidebar from "@/components/Vender-Dashboard/Sidebar";
+import { usePathname } from "next/navigation";
+
+import { AdminAuthProvider } from "@/contexts/adminAuthContext";
+import AdminProtected from "@/components/Admin-Dashboard/AdminAuthGuard/AdminGuard";
 import AdminSidebar from "@/components/Admin-Dashboard/AdminSidebar";
 
-export default function DashboardLayout({
+export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+
+  // 🔓 Public admin route
+  const isLoginPage = pathname === "/admin/login";
+
   return (
-    <div className="w-full flex justify-center">
-      <div className="flex w-full max-w-7xl py-10 min-h-screen bg-white">
-        {/* Sidebar */}
-        <AdminSidebar />
+    <AdminAuthProvider>
+      {isLoginPage ? (
+        // ✅ LOGIN PAGE (NO GUARD, NO SIDEBAR)
+        <>{children}</>
+      ) : (
+        // 🔒 ALL OTHER ADMIN ROUTES
+        <AdminProtected>
+          <div className="w-full flex justify-center">
+            <div className="flex w-full max-w-7xl py-10 min-h-screen bg-white">
+              {/* Sidebar */}
+              <AdminSidebar />
 
-        {/* Main content */}
-        <div className="flex-1 p-6 bg-gray-100">
-          <header className="flex justify-between items-center mb-6">
-            <h1 className="text-xl md:text-2xl lg:text-3xl font-semibold">
-              Dashboard
-            </h1>
-            <div className="flex items-center gap-4">
-              <div className="text-sm md:text-xl lg:text-xl">Welcome, User</div>
+              {/* Main content */}
+              <div className="flex-1 p-6 bg-gray-100">
+                {children}
+              </div>
             </div>
-          </header>
-
-          <main>{children}</main>
-        </div>
-      </div>
-    </div>
+          </div>
+        </AdminProtected>
+      )}
+    </AdminAuthProvider>
   );
 }
